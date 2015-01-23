@@ -1,0 +1,19 @@
+import "/robocomp/interfaces/IDSLs/AGMAgent.idsl";
+import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
+import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
+import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
+import "/robocomp/interfaces/IDSLs/TrajectoryRobot2D.idsl";
+import "/robocomp/interfaces/IDSLs/OmniRobot.idsl";
+
+Component navigationComp
+{
+	Communications
+	{
+		requires TrajectoryRobot2D, OmniRobot;
+		implements AGMCommonBehavior;
+		publishes AGMAgentTopic;
+		subscribesTo AGMExecutiveTopic;
+	};
+	language Cpp;
+	gui Qt(QWidget);
+};

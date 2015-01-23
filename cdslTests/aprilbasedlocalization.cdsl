@@ -1,0 +1,22 @@
+/* comentario */
+
+import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
+
+/** 
+
+COccMENTARIO
+
+**/
+
+Component /* pene */ AprilBasedLocalization
+{
+	Communications
+	{
+		// djewdiuofwo
+		subscribesTo AprilTags;
+		requires DifferentialRobot;
+	};
+
+	language Cpp;
+};
