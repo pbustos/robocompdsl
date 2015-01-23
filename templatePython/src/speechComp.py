@@ -191,6 +191,29 @@ class Server (Ice.Application):
 		try:
 			self.shutdownOnInterrupt()
 
+
+			# Proxy to publish AGMExecutiveTopic
+			proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
+			obj = self.communicator().stringToProxy(proxy)
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+			try:
+				topic = False
+				topic = topicManager.retrieve("AprilTagsTopic")
+			except:
+				pass
+			while not topic:
+				try:
+					topic = topicManager.retrieve("AprilTagsTopic")
+				except IceStorm.NoSuchTopic:
+					try:
+						topic = topicManager.create("AprilTagsTopic")
+					except:
+						print 'Another client created the AprilTagsTopic topic... ok'
+			pub = topic.getPublisher().ice_oneway()
+			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+
+
+
 			handler= SpeechHandler()
 			handler.start()
 			adapter = self.communicator().createObjectAdapter('SpeechComp')
@@ -222,28 +245,10 @@ class Server (Ice.Application):
 						print e
 						print "Error. Topic does not exist"
 						sys.exit(-1)
-			#qos = IceStorm.QoS()
 			qos = {}
 			apriltags_topic.subscribeAndGetPublisher(qos, apriltags_proxy)
 			AprilTags_adapter.activate()
 			print 'hecho'
-
-
-			#adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
-			#agentTopic = AGMAgentTopicI(executive)
-			#proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
-
-			#AGMAgentTopic_subscription = False
-			#while not AGMAgentTopic_subscription:
-				#try:
-					#topic = topicManager.retrieve("AGMAgentTopic")
-					#qos = {}
-					#topic.subscribeAndGetPublisher(qos, proxyT)
-					#adapterT.activate()
-					#AGMAgentTopic_subscription = True
-				#except IceStorm.NoSuchTopic:
-					#print "Error! No topic found! Sleeping for a while..."
-					#time.sleep(1)
 
 
 			self.communicator().waitForShutdown()
