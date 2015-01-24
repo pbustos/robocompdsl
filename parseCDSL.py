@@ -51,47 +51,63 @@ class CDSLParsing:
 		tree = CDSL.parseString(text)
 
 
-		CDSLParsing.printComponent(tree)
+		return CDSLParsing.component(tree)
 
 	@staticmethod
-	def printComponent(tree, start=''):
+	def printComponent(component, start=''):
 		# Component name
-		print 'Component', tree['component']['name']
+		print 'Component', component['name']
 		# Imports
 		print '\tImports:'
-		for imp in tree['imports']:
+		for imp in component['imports']:
 			print '\t\t', imp
 		# Language
 		print '\tLanguage:'
-		print '\t\t',tree['properties']['language'][0]
+		print '\t\t', component['language']
 		# GUI
 		print '\tGUI:'
-		gui = 'No GUI'
-		try:
-			gui = tree['properties']['gui'][0]
-		except:
-			pass
-		print '\t\t', gui
+		print '\t\t', component['gui']
 		# Communications
 		print '\tCommunications:'
-		implementsList = []
-		requiresList   = []
-		subscribesList = []
-		publishesList  = []
+		print '\t\tImplements', component['implements']
+		print '\t\tRequires', component['requires']
+		print '\t\tPublishes', component['publishes']
+		print '\t\tSubscribes', component['subscribesTo']
+
+	@staticmethod
+	def component(tree, start=''):
+		component = {}
+		
+		# Component name
+		component['name'] = tree['component']['name']
+		# Imports
+		component['imports'] = []
+		for imp in tree['imports']:
+			component['imports'] .append(imp)
+		# Language
+		component['language'] = tree['properties']['language'][0]
+		# GUI
+		component['gui'] = 'none'
+		try:
+			component['gui'] = tree['gui'][0]
+		except:
+			pass
+
+		# Communications
+		component['implements']   = []
+		component['requires']     = []
+		component['publishes']    = []
+		component['subscribesTo'] = []
 		for comm in tree['properties']['communications']:
 			if comm[0] == 'implements':
-				for interface in comm[1:]: implementsList.append(interface)
+				for interface in comm[1:]: component['implements'].append(interface)
 			if comm[0] == 'requires':
-				for interface in comm[1:]: requiresList.append(interface)
+				for interface in comm[1:]: component['requires'].append(interface)
 			if comm[0] == 'publishes':
-				for interface in comm[1:]: publishesList.append(interface)
+				for interface in comm[1:]: component['publishes'].append(interface)
 			if comm[0] == 'subscribesTo':
-				for interface in comm[1:]: subscribesList.append(interface)
-		print '\t\tImplements', implementsList
-		print '\t\tRequires', requiresList
-		print '\t\tPublishes', implementsList
-		print '\t\tSubscribes', subscribesList
+				for interface in comm[1:]: component['subscribesTo'].append(interface)
+		return component
 
-			
-
-CDSLParsing.fromFile(sys.argv[1])
+if __name__ == '__main__':
+	CDSLParsing.fromFile(sys.argv[1])
