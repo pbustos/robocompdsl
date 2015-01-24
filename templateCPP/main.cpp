@@ -111,8 +111,8 @@ using namespace RoboCompOmniRobot;
 using namespace RoboCompDifferentialRobot;
 
 
-class /*[[[cog cog.out(component['name']) ]]]*/
-/*[[[end]]]*/
+class
+[[[cog cog.out(component['name']) ]]]
 : public RoboComp::Application
 {
 private:
