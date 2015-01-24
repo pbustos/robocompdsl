@@ -15,5 +15,4 @@ Component navigationComp
 		subscribesTo AGMExecutiveTopic;
 	};
 	language Cpp;
-	gui Qt(QWidget);
 };
