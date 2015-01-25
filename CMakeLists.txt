@@ -1,0 +1,8 @@
+cmake_minimum_required( VERSION 2.8)
+
+
+#  Installation  #
+##################
+
+INSTALL(PROGRAMS "parseCDSL.py" DESTINATION /opt/robocomp/python)
+
