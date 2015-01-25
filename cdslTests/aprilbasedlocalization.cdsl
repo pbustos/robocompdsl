@@ -1,6 +1,7 @@
 /* comentario */
 
 import "/robocomp/interfaces/IDSLs/AprilTags.idsl";
+import "/robocomp/interfaces/IDSLs/OmniRobot.idsl";
 import "/robocomp/interfaces/IDSLs/DifferentialRobot.idsl";
 
 /** 
@@ -15,7 +16,7 @@ Component /* pene */ AprilBasedLocalization
 	{
 		// djewdiuofwo
 		subscribesTo AprilTags;
-		requires DifferentialRobot;
+		requires DifferentialRobot, OmniRobot;
 	};
 
 	language Cpp;

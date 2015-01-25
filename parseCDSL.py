@@ -9,6 +9,16 @@ import sys
 debug = False
 #debug = True
 
+import cog
+
+def A():
+	cog.out('<@@<')
+
+def Z():
+	cog.out('>@@>')
+
+def TAB():
+	cog.out('<TABHERE>')
 
 class CDSLParsing:
 	@staticmethod

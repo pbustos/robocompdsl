@@ -18,4 +18,13 @@ except:
 for f in files:
 	os.system("cog.py -z -d -D thefile=" + inputFile + " -o " + outputPath + '/' + f + " templateCPP/" + f)
 
+	i = open(outputPath + '/' + f, 'r')
+	text = i.read().replace("\n<@@<" ,"").replace(">@@>\n" ,"").replace("<TABHERE>", '\t')
+	i.close()
+	
+	w = open(outputPath + '/' + f, 'w')
+	w.write(text)
+	w.close()
+
+
 

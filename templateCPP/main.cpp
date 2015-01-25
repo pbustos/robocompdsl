@@ -1,5 +1,96 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+[[[cog
+
+import sys
+sys.path.append('/opt/robocomp/python')
+
+import cog
+from parseCDSL import *
+component = CDSLParsing.fromFile(thefile)
+
+
+REQUIRE_STR = """
+<TABHERE>try
+<TABHERE>{
+<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>::uncheckedCast( communicator()->stringToProxy( getProxyString("<NORMAL>Proxy") ) );
+<TABHERE>}
+<TABHERE>catch(const Ice::Exception& ex)
+<TABHERE>{
+<TABHERE><TABHERE>cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+<TABHERE><TABHERE>return EXIT_FAILURE;
+<TABHERE>}
+<TABHERE>rInfo("<NORMAL>Proxy initialized Ok!");
+<TABHERE>mprx["<NORMAL>Proxy"] = (::IceProxy::Ice::Object*)(&<LOWER>_proxy);//Remote server proxy creation example
+"""
+
+SUBSCRIBESTO_STR = """
+<TABHERE><TABHERE>// Server adapter creation and publication
+<TABHERE><TABHERE>Ice::ObjectAdapterPtr <NORMAL>_adapter = communicator()->createObjectAdapter("<NORMAL>Topic");
+<TABHERE><TABHERE><NORMAL>Ptr <LOWER>I_ = new <NORMAL>I(worker);
+<TABHERE><TABHERE>Ice::ObjectPrx <LOWER>_proxy = <NORMAL>_adapter->addWithUUID(<LOWER>I_)->ice_oneway();
+<TABHERE><TABHERE>IceStorm::TopicPrx <LOWER>_topic;
+<TABHERE><TABHERE>if(!<LOWER>_topic){
+<TABHERE><TABHERE>try {
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch (const IceStorm::TopicExists&) {
+<TABHERE><TABHERE>//Another client created the topic
+<TABHERE><TABHERE>try{
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch(const IceStorm::NoSuchTopic&)
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE>//Error. Topic does not exist
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>IceStorm::QoS qos;
+<TABHERE><TABHERE><LOWER>_topic->subscribeAndGetPublisher(qos, <LOWER>_proxy);
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE><NORMAL>_adapter->activate();
+"""
+
+PUBLISHES_STR = """
+<TABHERE>IceStorm::TopicPrx <LOWER>_topic;
+<TABHERE>while (!<LOWER>_topic)
+<TABHERE>{
+<TABHERE><TABHERE>try
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch (const IceStorm::NoSuchTopic&)
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE>try
+<TABHERE><TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE><TABHERE>catch (const IceStorm::TopicExists&){
+<TABHERE><TABHERE><TABHERE><TABHERE>// Another client created the topic.
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE>}
+<TABHERE>}
+<TABHERE>Ice::ObjectPrx <LOWER>_pub = <LOWER>_topic->getPublisher()->ice_oneway();
+<TABHERE><NORMAL>Prx <LOWER> = <NORMAL>Prx::uncheckedCast(<LOWER>_pub);
+<TABHERE>mprx["<NORMAL>Pub"] = (::IceProxy::Ice::Object*)(&<LOWER>);
+"""
+
+IMPLEMENTS_STR = """
+<TABHERE><TABHERE>// Server adapter creation and publication
+<TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = communicator()->createObjectAdapter("<NORMAL>Comp");
+<TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
+<TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, communicator()->stringToIdentity("<LOWER>"));
+"""
+
+]]]
+[[[end]]]
+ *    Copyright (C) 
+[[[cog
+A()
+import datetime
+cog.out(str(datetime.date.today().year))
+Z()
+]]]
+[[[end]]]
+ by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -17,39 +108,43 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-[[[cog
-
-import sys
-sys.path.append('/opt/robocomp/python')
-
-import cog
-import parseCDSL
-component = parseCDSL.CDSLParsing.fromFile(thefile)
-
-# fnames = ['DoSomething', 'DoAnotherThing', 'DoLastThing']
-# for fn in fnames:
-#    cog.outl("void %s();" % fn)
-
-]]]
-[[[end]]]
 
 /** \mainpage RoboComp::
+[[[cog
+A()
+cog.out(component['name'])
+]]]
+[[[end]]]
  *
  * \section intro_sec Introduction
  *
- * The genericComp component...
+ * The 
+[[[cog
+A()
+cog.out(' ' + component['name'])
+Z()
+]]]
+[[[end]]]
+ component...
  *
  * \section interface_sec Interface
  *
- * genericComp interface...
+ * interface...
  *
  * \section install_sec Installation
  *
  * \subsection install1_ssec Software depencences
- * genericComp ...
+ * ...
  *
  * \subsection install2_ssec Compile and install
- * cd genericComp
+ * cd
+[[[cog
+A()
+cog.out(' ' + component['name'])
+Z()
+]]]
+[[[end]]]
+
  * <br>
  * cmake . && make
  * <br>
@@ -62,12 +157,19 @@ component = parseCDSL.CDSLParsing.fromFile(thefile)
  * \subsection config_ssec Configuration file
  *
  * <p>
- * The configuration file genericComp/etc/specific_config and genericComp/etc/generic_config...
+ * The configuration file etc/specific_config and etc/generic_config...
  * </p>
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/genericComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/
+[[[cog
+A()
+cog.out(component['name'])
+Z()
+]]]
+[[[end]]]
+ --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -85,20 +187,26 @@ component = parseCDSL.CDSLParsing.fromFile(thefile)
 
 #include <rapplication/rapplication.h>
 #include <qlog/qlog.h>
-// View the config.h file for config options like
-// QtGui, etc...
+
 #include "config.h"
 #include "genericmonitor.h"
 #include "genericworker.h"
 #include "specificworker.h"
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
-#include <apriltagsI.h>
 
-// Includes for remote proxy example
-// #include <Remote.h>
-#include <OmniRobot.h>
-#include <DifferentialRobot.h>
+[[[cog
+for implement in component['implements'] + component['subscribesTo']:
+	cog.outl('#include <'+implement.lower()+'I.h>')
+
+cog.outl('')
+
+for imp in component['imports']:
+	incl = imp.split('/')[-1].split('.')[0]
+	cog.outl('#include <'+incl+'.h>')
+
+]]]
+[[[end]]]
 
 
 // User includes here
@@ -106,18 +214,27 @@ component = parseCDSL.CDSLParsing.fromFile(thefile)
 // Namespaces
 using namespace std;
 using namespace RoboCompCommonBehavior;
-using namespace RoboCompAprilTags;
-using namespace RoboCompOmniRobot;
-using namespace RoboCompDifferentialRobot;
+
+[[[cog
+for imp in component['imports']:
+	incl = imp.split('/')[-1].split('.')[0]
+	cog.outl('using namespace RoboComp'+incl+';')
+
+]]]
+[[[end]]]
+
 
 
 class
-[[[cog cog.out(component['name']) ]]]
+[[[cog
+A()
+cog.out(' ' + component['name'] + ' ')
+Z()
+]]]
+[[[end]]]
 : public RoboComp::Application
 {
 private:
-	// User private data here
-
 	void initialize();
 	MapPrx mprx;
 
@@ -125,14 +242,28 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void AprilBasedLocalization::initialize()
+void
+[[[cog
+A()
+cog.out(' ' + component['name'])
+Z()
+]]]
+[[[end]]]
+::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int AprilBasedLocalization::run(int argc, char* argv[])
+int
+[[[cog
+A()
+cog.out(' ' + component['name'])
+Z()
+]]]
+[[[end]]]
+::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -141,62 +272,33 @@ int AprilBasedLocalization::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-	// Remote server proxy access example
-	// RemoteComponentPrx remotecomponent_proxy;
-	OmniRobotPrx omnirobot_proxy;
-DifferentialRobotPrx differentialrobot_proxy;
-
+[[[cog
+for rq in component['requires'] + component['publishes']:
+	req = rq.split('/')[-1].split('.')[0]
+	cog.outl('<TABHERE>'+req+'Prx '+req.lower() +'_proxy;')
+]]]
+[[[end]]]
 
 	string proxy;
-
-	// User variables
-
-
 	initialize();
 
-	// Remote server proxy creation example
-	// try
-	// {
-	// 	// Load the remote server proxy
-	//	proxy = getProxyString("RemoteProxy");
-	//	remotecomponent_proxy = RemotePrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	//	if( !remotecomponent_proxy )
-	//	{
-	//		rInfo(QString("Error loading proxy!"));
-	//		return EXIT_FAILURE;
-	//	}
-	//catch(const Ice::Exception& ex)
-	//{
-	//	cout << "[" << PROGRAM_NAME << "]: Exception: " << ex << endl;
-	//	return EXIT_FAILURE;
-	//}
-	//rInfo("RemoteProxy initialized Ok!");
-	// 	// Now you can use remote server proxy (remotecomponent_proxy) as local object
-	//Remote server proxy creation example
-	try
-	{
-		omnirobot_proxy = OmniRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("OmniRobotProxy") ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("OmniRobotProxy initialized Ok!");
-	mprx["OmniRobotProxy"] = (::IceProxy::Ice::Object*)(&omnirobot_proxy);//Remote server proxy creation example
-	try
-	{
-		differentialrobot_proxy = DifferentialRobotPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("DifferentialRobotProxy") ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("DifferentialRobotProxy initialized Ok!");
-	mprx["DifferentialRobotProxy"] = (::IceProxy::Ice::Object*)(&differentialrobot_proxy);
+[[[cog
+for rq in component['requires']:
+	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
+
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	
+
+[[[cog
+for pb in component['publishes']:
+	w = PUBLISHES_STR.replace("<NORMAL>", pb).replace("<LOWER>", pb.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
+
 	
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -214,28 +316,33 @@ DifferentialRobotPrx differentialrobot_proxy;
 		CommonBehaviorI *commonbehaviorI = new CommonBehaviorI(monitor );
 		adapterCommonBehavior->add(commonbehaviorI, communicator()->stringToIdentity("commonbehavior"));
 		adapterCommonBehavior->activate();
+
+
+[[[cog
+for im in component['implements']:
+	w = IMPLEMENTS_STR.replace("<NORMAL>", im).replace("<LOWER>", im.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
+
+
+[[[cog
+for st in component['subscribesTo']:
+	w = SUBSCRIBESTO_STR.replace("<NORMAL>", st).replace("<LOWER>", st.lower())
+	cog.out(w)
+]]]
+[[[end]]]
+
+
 		// Server adapter creation and publication
-    	Ice::ObjectAdapterPtr AprilTags_adapter = communicator()->createObjectAdapter("AprilTagsTopic");
-    	AprilTagsPtr apriltagsI_ = new AprilTagsI(worker);
-    	Ice::ObjectPrx apriltags_proxy = AprilTags_adapter->addWithUUID(apriltagsI_)->ice_oneway();
-    	IceStorm::TopicPrx apriltags_topic;
-    	if(!apriltags_topic){
-	    	try {
-	    		apriltags_topic = topicManager->create("AprilTags");
-	    	}
-	    	catch (const IceStorm::TopicExists&) {
-	    	  	//Another client created the topic
-	    	  	try{
-	       			apriltags_topic = topicManager->retrieve("AprilTags");
-	    	  	}catch(const IceStorm::NoSuchTopic&){
-	    	  	  	//Error. Topic does not exist
-				}
-	    	}
-	    	IceStorm::QoS qos;
-	      	apriltags_topic->subscribeAndGetPublisher(qos, apriltags_proxy);
-    	}
-    	AprilTags_adapter->activate();
-    	// Server adapter creation and publication
+		Ice::ObjectAdapterPtr adapterGetAprilTags = communicator()->createObjectAdapter("GetAprilTagsComp");
+		GetAprilTagsI *getapriltags = new GetAprilTagsI(worker);
+		adapterGetAprilTags->add(getapriltags, communicator()->stringToIdentity("getapriltags"));
+		adapterGetAprilTags->activate();
+
+
+
+		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
@@ -268,7 +375,14 @@ int main(int argc, char* argv[])
 {
 	bool hasConfig = false;
 	string arg;
-	AprilBasedLocalization app;
+	
+[[[cog
+A()
+cog.out(' ' + component['name'] + ' ')
+Z()
+]]]
+[[[end]]]
+app;
 
 	// Search in argument list for --Ice.Config= argument
 	for (int i = 1; i < argc; ++i)
@@ -283,3 +397,4 @@ int main(int argc, char* argv[])
 	else
 		return app.main(argc, argv, "../etc/generic_config"); // "config" is the default config file name
 }
+
