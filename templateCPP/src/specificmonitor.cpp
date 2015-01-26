@@ -85,39 +85,11 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 ///We need to supply a list of accepted values to each call
 void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 {
-	RoboCompCommonBehavior::Parameter aux;
-	aux.editable = true;
-	configGetString( "InputInterface", aux.value,"Camera");  //Could be RGBD, RGBDBus
-	params["InputInterface"] = aux;
-	
-	aux.editable = false;
-	configGetString( "AprilTagsFamily", aux.value,"tagCodes36h11"); 
-	params["AprilTagsFamily"] = aux;
-	
-// 	aux.editable = false;
-// 	configGetString( "AprilTagsSize", aux.value,"0.175"); 
-// 	params["AprilTagsSize"] = aux;
-// 	
-	
-	aux.editable = false;
-	configGetString( "ID:0-10", aux.value,"86"); //MILLIMETERS 
-	params["ID:0-10"] = aux;
-	
-	aux.editable = false;
-	configGetString( "ID:11-20", aux.value,"86"); //MILLIMETERS 
-	params["ID:11-20"] = aux;
-
-	aux.editable = false;
-	configGetString( "ID:21-30", aux.value,"86"); //MILLIMETERS 
-	params["ID:21-30"] = aux;
-
-	aux.editable = true;
-	configGetString( "CameraName", aux.value, "rgbd");
-	params["CameraName"] = aux;
-	
-	aux.editable = true;
-	configGetString( "InnerModelPath", aux.value, "");
-	params["InnerModelPath"] = aux;
+// 	RoboCompCommonBehavior::Parameter aux;
+// 
+// 	aux.editable = true;
+// 	configGetString( "InnerModelPath", aux.value, "");
+// 	params["InnerModelPath"] = aux;
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker

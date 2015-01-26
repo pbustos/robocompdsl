@@ -57,17 +57,13 @@ def replaceTagsInFile(path):
 # SERVANTS
 #genericworker.cpp
 #genericworker.h
-
-#specificmonitor.h
 #specificworker.h
-
-#specificmonitor.cpp
 #specificworker.cpp
 
 #
 # Generate regular files
 #
-files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h' ]
+files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp' ]
 for f in files:
 	ofile = outputPath + '/' + f
 	ifile = "templateCPP/" + f
