@@ -21,25 +21,33 @@ component = CDSLParsing.fromFile(thefile)
 
 ]]]
 [[[end]]]
-cmake_minimum_required( VERSION 2.8 )
+#ifndef CONFIG_H
+#define CONFIG_H
 
-SUBDIRS( src )
-
-INSTALL(FILES etc/config DESTINATION /opt/robocomp/etc-default/ RENAME
+// Comment out this line if your application has a QtGui
+//#define USE_QTGUI
+#define PROGRAM_NAME    "
 [[[cog
 A()
 cog.out(' ' + component['name'])
 Z()
 ]]]
 [[[end]]]
-.conf )
-
-ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
-ADD_CUSTOM_TARGET(installdoc mkdir -p /opt/robocomp/doc COMMAND cp -R doc/html /opt/robocomp/doc/
+"
+#define SERVER_FULL_NAME   "RoboComp
 [[[cog
 A()
-cog.out( component['name'] + ' ')
+cog.out(' ' + component['name'])
 Z()
 ]]]
 [[[end]]]
-)
+::
+[[[cog
+A()
+cog.out(' ' + component['name'])
+Z()
+]]]
+[[[end]]]
+"
+
+#endif

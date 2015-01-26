@@ -18,3 +18,4 @@ Component objectComp
 	language Cpp;
 	gui Qt(QWidget);
 };
+

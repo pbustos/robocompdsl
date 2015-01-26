@@ -1,3 +1,26 @@
+[[[cog
+
+import sys
+sys.path.append('/opt/robocomp/python')
+
+import cog
+def A():
+	cog.out('<@@<')
+def Z():
+	cog.out('>@@>')
+def TAB():
+	cog.out('<TABHERE>')
+def SPACE(i=0):
+	s = ''
+	if i>0:
+		s = str(i)
+	cog.out('<S'+s+'>')
+
+from parseCDSL import *
+component = CDSLParsing.fromFile(thefile)
+
+]]]
+[[[end]]]
 # Doxyfile 1.6.1
 
 # This file describes the settings to be used by the documentation system
@@ -18,7 +41,14 @@
 DOXYFILE_ENCODING      = UTF-8
 
 # ROBOCOMP
-PROJECT_NAME           = aprilbasedlocalization
+PROJECT_NAME           = 
+[[[cog
+A()
+cog.out( component['name'] + ' ')
+Z()
+]]]
+[[[end]]]
+
 PROJECT_NUMBER         =
 
 

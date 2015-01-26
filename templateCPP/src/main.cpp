@@ -164,7 +164,7 @@ Z()
  * \subsection config_ssec Configuration file
  *
  * <p>
- * The configuration file etc/specific_config and etc/generic_config...
+ * The configuration file etc/config...
  * </p>
  *
  * \subsection execution_ssec Execution
@@ -402,6 +402,6 @@ app;
 	if ( hasConfig )
 		return app.main( argc, argv );
 	else
-		return app.main(argc, argv, "../etc/generic_config"); // "config" is the default config file name
+		return app.main(argc, argv, "../etc/config"); // "config" is the default config file name
 }
 
