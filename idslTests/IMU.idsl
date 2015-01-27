@@ -50,7 +50,7 @@ module RoboCompIMU
 
     // Returns IMU linear aceleration, angular velocity, magnetic fields and orientation - euler angles
     DataImu getDataImu();
-    Acceleration getAcceleration(int a);
+    Acceleration getAcceleration(int aaa);
 		Wgyr getVelangular();
 		Magnetic getMagneticfields();
 		Orientation getOrientation();

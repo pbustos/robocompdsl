@@ -14,12 +14,14 @@ class IDSLParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
 		# Open input file
-		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
+		#inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
+		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n")])
 		return IDSLParsing.fromString(inputText)
 	@staticmethod
 	def fromString(inputText, verbose=False):
 		if verbose: print 'Verbose:', verbose
-		text = nestedExpr("/*", "*/").suppress().transformString(inputText) 
+		#text = nestedExpr("/*", "*/").suppress().transformString(inputText) 
+		text = inputText
 
 		semicolon = Suppress(Word(";"))
 		quote     = Suppress(Word("\""))
@@ -36,35 +38,28 @@ class IDSLParsing:
 		idslImports = ZeroOrMore(idslImport)
 
 
-		## Communications
-		#publishesList  = Group(Word('publishesList') + identifier + ZeroOrMore(Suppress(Word(',')) + identifier) + semicolon)
-		#communicationList = implementsList | requiresList | subscribesList | publishesList
-		#communications = Group( Suppress(Word("Communications")) + op + ZeroOrMore(communicationList) + cl + semicolon)
-		## Language
-		#language = Suppress(Word("language")) + (Word("Cpp")|Word("Python")) + semicolon
-		## GUI
-		#gui = Optional(Group( Word("gui") + Word("Qt") + opp + identifier + clp + semicolon ))
-		
-
 		dictionaryDef = Word("dictionary") + lt + CharsNotIn("<>;") + gt + identifier.setResultsName('name') + semicolon
 		sequenceDef   = Word("sequance")   + lt + CharsNotIn("<>;") + gt + identifier.setResultsName('name') + semicolon
+		enumDef       = Word("enum")       + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		structDef     = Word("struct")     + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		exceptionDef  = Word("exception")  + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		
-		parameterDef    = Group( Optional(identifier.setResultsName('decorator')) + identifier.setResultsName('rtype') + identifier.setResultsName('vname') )
-		parametersDef   = Optional(parameterDef) + ZeroOrMore(Suppress(Word(',')) + parameterDef)
-		raiseDef        = Optional(Suppress(Word("throws")) + identifier)
-
-		decoratorDef    = Optional((Word('idempotent') | Word('idempotent') | Word('idempotent')).setResultsName('dec'))
+		raiseDef       = Optional(Suppress(Word("throws")) + identifier)
+		decoratorDef    = Optional( (Word('idempotent') | Word('out') | Word('idempotent')).setResultsName('dec') )
 		retValDef       = identifier.setResultsName('ret')
-		remoteMethodDef = Group(decoratorDef + retValDef +  identifier.setResultsName('name') + opp + Optional(CharsNotIn('(){};')).setResultsName('params') + clp + raiseDef + semicolon )
+
+		param         = Group( Optional(decoratorDef.setResultsName('decorator')) + identifier.setResultsName('type') + identifier.setResultsName('name'))
+		params        = param        +  ZeroOrMore(Suppress(Word(',')) + param)
+
+		remoteMethodDef = Group(decoratorDef + retValDef +  identifier.setResultsName('name') + opp + Optional(params).setResultsName('params') + clp + raiseDef + semicolon )
 		#remoteMethodDef = Group( ++ + semicolon )
 		interfaceDef    = Word("interface")  + identifier.setResultsName('name') + op + Group(ZeroOrMore(remoteMethodDef)) + cl + semicolon
 
-		moduleContent = Group(structDef | exceptionDef | dictionaryDef | sequenceDef | interfaceDef)
+		moduleContent = Group(structDef | enumDef | exceptionDef | dictionaryDef | sequenceDef | interfaceDef)
 		module = Suppress(Word("module")) + identifier.setResultsName("name") + op + ZeroOrMore(moduleContent).setResultsName("contents") + cl + semicolon		
 
 		IDSL = idslImports.setResultsName("imports") + module.setResultsName("module")
+		IDSL.ignore( cppStyleComment )
 		tree = IDSL.parseString(text)
 
 
@@ -103,7 +98,28 @@ class IDSLParsing:
 				print 'INTERFACE', contentDef[1]
 				
 				for method in contentDef[2]:
-					print '\t', method
+
+					print '\t', method['name']
+
+					print '\t\tDecorator: ', 
+					try:
+						print method['decorator']
+					except:
+						print ''
+
+					print '\t\tReturn value: ', method['ret']
+
+					print '\t\tParams:',
+					try:
+						print method['params']
+					except:
+						print ''
+
+					print '\t\tThrows:',
+					try:
+						print method['throws']
+					except:
+						print ''
 
 
 
