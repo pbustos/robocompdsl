@@ -20,7 +20,7 @@ class IDSLParsing:
 	@staticmethod
 	def fromString(inputText, verbose=False):
 		if verbose: print 'Verbose:', verbose
-		#text = nestedExpr("/*", "*/").suppress().transformString(inputText) 
+		#text = nestedExpr("/*", "*/").suppress().transformString(inputText)
 		text = inputText
 
 		semicolon = Suppress(Word(";"))
@@ -31,8 +31,12 @@ class IDSLParsing:
 		clp       = Suppress(Word(")"))
 		lt       = Suppress(Word("<"))
 		gt       = Suppress(Word(">"))
-		identifier = Word( alphas+"_", alphanums+"_" )
-		
+		identifier     = Word(alphas+"_",alphanums+"_")
+		typeIdentifier = Word(alphas+"_",alphanums+"_:")
+
+		#identifier.parse("RoboCompJointMotor::MotorStateMap")
+		#sys.exit(0)
+
 		## Imports
 		idslImport  = Suppress(Word("import")) + quote +  CharsNotIn("\";").setResultsName('path') + quote + semicolon
 		idslImports = ZeroOrMore(idslImport)
@@ -43,50 +47,45 @@ class IDSLParsing:
 		enumDef       = Word("enum")       + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		structDef     = Word("struct")     + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		exceptionDef  = Word("exception")  + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
-		
-		raiseDef       = Optional(Suppress(Word("throws")) + identifier)
-		decoratorDef    = Optional( (Word('idempotent') | Word('out') | Word('idempotent')).setResultsName('dec') )
+
+		raiseDef       = Suppress(Word("throws")) + identifier
+		decoratorDef    = Literal('idempotent') | Literal('out')
 		retValDef       = identifier.setResultsName('ret')
 
-		param         = Group( Optional(decoratorDef.setResultsName('decorator')) + identifier.setResultsName('type') + identifier.setResultsName('name'))
-		params        = param        +  ZeroOrMore(Suppress(Word(',')) + param)
+		firstParam    = Group( Optional(decoratorDef.setResultsName('decorator')) + typeIdentifier.setResultsName('type') + identifier.setResultsName('name'))
+		nextParam     = Suppress(Word(',')) + firstParam
+		params        = firstParam + ZeroOrMore(nextParam)
 
-		remoteMethodDef = Group(decoratorDef + retValDef +  identifier.setResultsName('name') + opp + Optional(params).setResultsName('params') + clp + raiseDef + semicolon )
-		#remoteMethodDef = Group( ++ + semicolon )
+		#re = params.parseString("out depthType distanceMatrix, out RoboCompJointMotor::MotorStateMap hState, out RoboCompDifferentialRobot::TBaseState bState")
+		#for p in re:
+			#try:
+				#pdecorator = p['decorator']
+			#except:
+				#pdecorator = ''
+			#ptype = p['type']
+			#pname = p['name']
+			#print 'parameter', pdecorator, ptype, pname
+		#sys.exit(0)
+
+		#remoteMethodDef = Group(Optional(decoratorDef) + retValDef +  identifier.setResultsName('name') + opp + Optional(CharsNotIn("()")).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
+		remoteMethodDef  = Group(Optional(decoratorDef) + retValDef +  identifier.setResultsName('name') + opp + Optional(          params).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
 		interfaceDef    = Word("interface")  + identifier.setResultsName('name') + op + Group(ZeroOrMore(remoteMethodDef)) + cl + semicolon
 
 		moduleContent = Group(structDef | enumDef | exceptionDef | dictionaryDef | sequenceDef | interfaceDef)
-		module = Suppress(Word("module")) + identifier.setResultsName("name") + op + ZeroOrMore(moduleContent).setResultsName("contents") + cl + semicolon		
+		module = Suppress(Word("module")) + identifier.setResultsName("name") + op + ZeroOrMore(moduleContent).setResultsName("contents") + cl + semicolon
 
 		IDSL = idslImports.setResultsName("imports") + module.setResultsName("module")
 		IDSL.ignore( cppStyleComment )
-		tree = IDSL.parseString(text)
 
+
+		tree = IDSL.parseString(text)
 
 		return IDSLParsing.module(tree)
 
 	@staticmethod
-	def printmodule(module, start=''):
-		# module name
-		print 'module', module['name']
-		# Imports
-		## Language
-		#print '\tLanguage:'
-		#print '\t\t', module['language']
-		## GUI
-		#print '\tGUI:'
-		#print '\t\t', module['gui']
-		## Communications
-		#print '\tCommunications:'
-		#print '\t\tImplements', module['implements']
-		#print '\t\tRequires', module['requires']
-		#print '\t\tPublishes', module['publishes']
-		#print '\t\tSubscribes', module['subscribesTo']
-
-	@staticmethod
 	def module(tree, start=''):
 		module = {}
-		
+
 		# module name
 		module['name'] = tree['module']['name']
 
@@ -95,65 +94,56 @@ class IDSLParsing:
 		module['interfaces'] = []
 		for contentDef in tree['module']['contents']:
 			if contentDef[0] == 'interface':
-				print 'INTERFACE', contentDef[1]
-				
+				interface = { 'name':contentDef[1], 'methods':{}}
 				for method in contentDef[2]:
+					interface['methods'][method['name']] = {}
 
-					print '\t', method['name']
-
-					print '\t\tDecorator: ', 
+					interface['methods'][method['name']]['name'] = method['name']
 					try:
-						print method['decorator']
+						interface['methods'][method['name']]['decorator'] = method['decorator']
 					except:
-						print ''
+						interface['methods'][method['name']]['decorator'] = ''
 
-					print '\t\tReturn value: ', method['ret']
+					interface['methods'][method['name']]['return'] = method['ret']
 
-					print '\t\tParams:',
+					params = []
 					try:
-						print method['params']
+						for p in method['params']:
+							try:
+								params.append( { 'decorator':p['decorator'], 'type':p['type'], 'name':p['name'] } )
+							except:
+								params.append( { 'decorator':'none',         'type':p['type'], 'name':p['name'] } )
 					except:
-						print ''
+						pass
+					interface['methods'][method['name']]['params'] = params
 
-					print '\t\tThrows:',
 					try:
-						print method['throws']
+						interface['methods'][method['name']]['throws'] = method['decorator']
 					except:
-						print ''
-
-
-
-
-		## Imports
-		#module['imports'] = []
-		#for imp in tree['imports']:
-			#module['imports'] .append(imp)
-		## Language
-		#module['language'] = tree['contents']['language'][0]
-		## GUI
-		#module['gui'] = 'none'
-		#try:
-			#module['gui'] = tree['gui'][0]
-		#except:
-			#pass
-
-		## Communications
-		#module['implements']   = []
-		#module['requires']     = []
-		#module['publishes']    = []
-		#module['subscribesTo'] = []
-		#for comm in tree['contents']['communications']:
-			#if comm[0] == 'implements':
-				#for interface in comm[1:]: module['implements'].append(interface)
-			#if comm[0] == 'requires':
-				#for interface in comm[1:]: module['requires'].append(interface)
-			#if comm[0] == 'publishes':
-				#for interface in comm[1:]: module['publishes'].append(interface)
-			#if comm[0] == 'subscribesTo':
-				#for interface in comm[1:]: module['subscribesTo'].append(interface)
+						interface['methods'][method['name']]['throws'] = 'nothing'
+				module['interfaces'].append(interface)
 		return module
+
+	@staticmethod
+	def printModule(module, start=''):
+		# module name
+		print 'MODULE', module['name']+':'
+
+		print ' ', 'INTERFACES:'
+
+
+		for interface in module['interfaces']:
+			print '   ', interface['name']
+			for mname in interface['methods']:
+				method = interface['methods'][mname]
+				print '     ', method['name']
+				print '        decorator', method['decorator']
+				print '        return', method['return']
+				print '        params'
+				for p in method['params']:
+					#print p
+					print '         ', '<', p['decorator'], '>  <', p['type'], '>  <', p['name'], '>'
 
 if __name__ == '__main__':
 	idsl = IDSLParsing.fromFile(sys.argv[1])
-	IDSLParsing.printmodule(idsl)
-	
+	IDSLParsing.printModule(idsl)

@@ -16,44 +16,44 @@ module RoboCompIMU
 		float Yaw;
 		float Temperature;
 	};
-	
+
 	struct Acceleration
   {
     float XAcc;
     float YAcc;
     float ZAcc;
   };
-	
+
   struct Wgyr
   {
 		float XGyr;
 		float YGyr;
 		float ZGyr;
 	};
-	
+
   struct Magnetic
   {
 		float XMag;
 		float YMag;
-		float ZMag;		
+		float ZMag;
 	};
 
   struct Orientation
   {
 		float Roll;
 		float Pich;
-		float Yaw;		
+		float Yaw;
 	};
-	
+
   interface IMU
   {
 
     // Returns IMU linear aceleration, angular velocity, magnetic fields and orientation - euler angles
     DataImu getDataImu();
     Acceleration getAcceleration(int aaa);
-		Wgyr getVelangular();
-		Magnetic getMagneticfields();
-		Orientation getOrientation();
+	Wgyr getVelangular();
+	Magnetic getMagneticfields();
+	Orientation getOrientation();
     void resetImu();
 
   };
