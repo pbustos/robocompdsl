@@ -101,35 +101,49 @@ for req in component['requires']:
 ]]]
 [[[end]]]
 
-
 [[[cog
 for pub in component['publishes']:
 	cog.outl("<TABHERE>"+pub+" "    + pub.lower() + ";")
 ]]]
 [[[end]]]
 
-
 [[[cog
 if 'implements' in component:
 	for imp in component['implements']:
+		print('implements '+imp)
+		module = pool.moduleProviding(imp)
 		for interface in module['interfaces']:
 			if interface['name'] == imp:
 				for mname in interface['methods']:
 					method = interface['methods'][mname]
-						cog.outl("virtual IMPLEMENTS " + method)
+					paramStrA = ''
+					for p in method['params']:
+						if paramStrA == '': delim = ''
+						else: delim = ', '
+						if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
+						else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
+					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '(' + paramStrA + ") = 0;")
 ]]]
 [[[end]]]
-
 
 [[[cog
 if 'subscribes' in component:
 	for sub in component['subscribes']:
-		cog.outl("SUBSCRIBES " + sub)
+		print('subscribes '+sub)
+		module = pool.moduleProviding(sub)
+		for interface in module['interfaces']:
+			if interface['name'] == sub:
+				for mname in interface['methods']:
+					method = interface['methods'][mname]
+					paramStrA = ''
+					for p in method['params']:
+						if paramStrA == '': delim = ''
+						else: delim = ', '
+						if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
+						else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
+					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '('  + ") = 0;")
 ]]]
 [[[end]]]
-
-
-	virtual listaMarcas checkMarcas() = 0;
 
 protected:
 	QTimer timer;
