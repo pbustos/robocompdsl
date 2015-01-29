@@ -112,7 +112,11 @@ for pub in component['publishes']:
 [[[cog
 if 'implements' in component:
 	for imp in component['implements']:
-		cog.outl("IMPLEMENTS " + imp)
+		for interface in module['interfaces']:
+			if interface['name'] == imp:
+				for mname in interface['methods']:
+					method = interface['methods'][mname]
+						cog.outl("virtual IMPLEMENTS " + method)
 ]]]
 [[[end]]]
 
@@ -123,6 +127,7 @@ if 'subscribes' in component:
 		cog.outl("SUBSCRIBES " + sub)
 ]]]
 [[[end]]]
+
 
 	virtual listaMarcas checkMarcas() = 0;
 
