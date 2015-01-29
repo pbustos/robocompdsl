@@ -110,7 +110,6 @@ for pub in component['publishes']:
 [[[cog
 if 'implements' in component:
 	for imp in component['implements']:
-		print('implements '+imp)
 		module = pool.moduleProviding(imp)
 		for interface in module['interfaces']:
 			if interface['name'] == imp:
@@ -127,9 +126,8 @@ if 'implements' in component:
 [[[end]]]
 
 [[[cog
-if 'subscribes' in component:
-	for sub in component['subscribes']:
-		print('subscribes '+sub)
+if 'subscribesTo' in component:
+	for sub in component['subscribesTo']:
 		module = pool.moduleProviding(sub)
 		for interface in module['interfaces']:
 			if interface['name'] == sub:
@@ -141,7 +139,7 @@ if 'subscribes' in component:
 						else: delim = ', '
 						if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
 						else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
-					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '('  + ") = 0;")
+					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '(' + paramStrA + ") = 0;")
 ]]]
 [[[end]]]
 

@@ -63,7 +63,7 @@ imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
 #
 # Generate regular files
 #
-files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h' ]
+files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h', 'src/genericworker.cpp' ]
 for f in files:
 	ofile = outputPath + '/' + f
 	ifile = "templateCPP/" + f

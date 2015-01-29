@@ -1,5 +1,38 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+[[[cog
+
+import sys
+sys.path.append('/opt/robocomp/python')
+
+import cog
+def A():
+	cog.out('<@@<')
+def Z():
+	cog.out('>@@>')
+def TAB():
+	cog.out('<TABHERE>')
+
+from parseCDSL import *
+component = CDSLParsing.fromFile(theCDSL)
+if component == None:
+	print('Can\'t locate', theCDSLs)
+	sys.exit(1)
+
+from parseIDSL import *
+pool = IDSLPool(theIDSLs)
+
+
+]]]
+[[[end]]]
+ *    Copyright (C) 
+[[[cog
+A()
+import datetime
+cog.out(str(datetime.date.today().year))
+Z()
+]]]
+[[[end]]]
+ by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,10 +55,17 @@
 */
 GenericWorker::GenericWorker(MapPrx& mprx, QObject *parent) : QObject(parent)
 {
-	camera_proxy = (*(CameraPrx*)mprx["CameraProxy"]);
-	rgbd_proxy = (*(RGBDPrx*)mprx["RGBDProxy"]);
-	rgbdbus_proxy = (*(RGBDBusPrx*)mprx["RGBDBusProxy"]);
-	apriltags = (*(AprilTagsPrx*)mprx["AprilTagsPub"]);
+[[[cog
+for rq in component['requires']:
+	cog.outl("<TABHERE>"+rq.lower()+"_proxy = (*("+rq+"Prx*)mprx[\""+rq+"Proxy\"]);")
+]]]
+[[[end]]]
+
+[[[cog
+for pb in component['publishes']:
+	cog.outl("<TABHERE>"+pb.lower()+" = (*("+pb+"Prx*)mprx[\""+pb+"Pub\"]);")
+]]]
+[[[end]]]
 
 	mutex = new QMutex();
 	Period = BASIC_PERIOD;
