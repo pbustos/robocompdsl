@@ -19,6 +19,7 @@ if component == None:
 	sys.exit(1)
 
 from parseIDSL import *
+pool = IDSLPool(theIDSLs)
 
 
 ]]]
@@ -59,7 +60,6 @@ Z()
 #include <CommonBehavior.h>
 [[[cog
 
-pool = IDSLPool(theIDSLs)
 for m in pool.modulePool:
 	cog.outl("#include <"+m+".h>")
 
@@ -95,11 +95,37 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
 
-	CameraPrx camera_proxy;
-	RGBDPrx rgbd_proxy;
-	RGBDBusPrx rgbdbus_proxy;
-	AprilTagsPrx apriltags;
+[[[cog
+for req in component['requires']:
+	cog.outl("<TABHERE>"+req+"Prx " + req.lower() + "_proxy;")
+]]]
+[[[end]]]
+
+
+[[[cog
+for pub in component['publishes']:
+	cog.outl("<TABHERE>"+pub+" "    + pub.lower() + ";")
+]]]
+[[[end]]]
+
+
+[[[cog
+if 'implements' in component:
+	for imp in component['implements']:
+		cog.outl("IMPLEMENTS " + imp)
+]]]
+[[[end]]]
+
+
+[[[cog
+if 'subscribes' in component:
+	for sub in component['subscribes']:
+		cog.outl("SUBSCRIBES " + sub)
+]]]
+[[[end]]]
+
 	virtual listaMarcas checkMarcas() = 0;
+
 protected:
 	QTimer timer;
 	int Period;
