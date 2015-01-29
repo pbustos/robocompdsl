@@ -13,7 +13,7 @@ def TAB():
 	cog.out('<TABHERE>')
 
 from parseCDSL import *
-component = CDSLParsing.fromFile(thefile)
+component = CDSLParsing.fromFile(theCDSL)
 
 
 REQUIRE_STR = """

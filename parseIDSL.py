@@ -33,8 +33,6 @@ class IDSLParsing:
 		identifier     = Word(alphas+"_",alphanums+"_")
 		typeIdentifier = Word(alphas+"_",alphanums+"_:")
 
-		#identifier.parse("RoboCompJointMotor::MotorStateMap")
-		#sys.exit(0)
 
 		## Imports
 		idslImport  = Suppress(Word("import")) + quote +  CharsNotIn("\";").setResultsName('path') + quote + semicolon
@@ -55,18 +53,7 @@ class IDSLParsing:
 		nextParam     = Suppress(Word(',')) + firstParam
 		params        = firstParam + ZeroOrMore(nextParam)
 
-		#re = params.parseString("out depthType distanceMatrix, out RoboCompJointMotor::MotorStateMap hState, out RoboCompDifferentialRobot::TBaseState bState")
-		#for p in re:
-			#try:
-				#pdecorator = p['decorator']
-			#except:
-				#pdecorator = ''
-			#ptype = p['type']
-			#pname = p['name']
-			#print 'parameter', pdecorator, ptype, pname
-		#sys.exit(0)
 
-		#remoteMethodDef = Group(Optional(decoratorDef) + retValDef +  identifier.setResultsName('name') + opp + Optional(CharsNotIn("()")).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
 		remoteMethodDef  = Group(Optional(decoratorDef) + retValDef +  identifier.setResultsName('name') + opp + Optional(          params).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
 		interfaceDef    = Word("interface")  + identifier.setResultsName('name') + op + Group(ZeroOrMore(remoteMethodDef)) + cl + semicolon
 
@@ -85,7 +72,7 @@ class IDSLParsing:
 	def module(tree, start=''):
 		module = {}
 
-		# module name
+		#module name
 		module['name'] = tree['module']['name']
 
 
@@ -125,12 +112,8 @@ class IDSLParsing:
 
 	@staticmethod
 	def printModule(module, start=''):
-		# module name
 		print 'MODULE', module['name']+':'
-
 		print ' ', 'INTERFACES:'
-
-
 		for interface in module['interfaces']:
 			print '   ', interface['name']
 			for mname in interface['methods']:
@@ -140,7 +123,6 @@ class IDSLParsing:
 				print '        return', method['return']
 				print '        params'
 				for p in method['params']:
-					#print p
 					print '         ', '<', p['decorator'], '>  <', p['type'], '>  <', p['name'], '>'
 
 
@@ -160,20 +142,16 @@ class IDSLPool:
 			else:
 				fileList.append(p)
 		pathList.append('/home/robocomp/robocomp/interfaces/IDSLs/')
-		#print 'IDSLPool: pathList:', pathList
-		#print 'IDSLPool: fileList:', fileList
 		for f in fileList:
-			namespace = f.split('.')[0]
-			#print namespace
+			filename = f.split('.')[0]
 			for p in pathList:
 				try:
 					path = p+'/'+f
-					#print 'try', path
-					self.modulePool[namespace] = IDSLParsing.fromFile(path)
+					self.modulePool[filename] = IDSLParsing.fromFile(path)
 					break
 				except IOError, e:
 					pass
-			if not namespace in self.modulePool:
+			if not filename in self.modulePool:
 				print 'Couldn\'t locate ', f
 				sys.exit(-1)
 

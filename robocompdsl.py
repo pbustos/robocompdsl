@@ -58,6 +58,8 @@ def replaceTagsInFile(path):
 #specificworker.h
 #specificworker.cpp
 
+imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
+
 #
 # Generate regular files
 #
@@ -66,7 +68,7 @@ for f in files:
 	ofile = outputPath + '/' + f
 	ifile = "templateCPP/" + f
 	print 'Generating', ofile, 'from', ifile
-	run = "cog.py -z -d -D thefile=" + inputFile + " -o " + ofile + " " + ifile
+	run = "cog.py -z -d -D theCDSL="+inputFile + " -D theIDSLs="+imports + " -o " + ofile + " " + ifile
 	run = run.split(' ')
 	ret = subprocess.check_call(run)
 	if ret != 0:
@@ -78,8 +80,6 @@ for f in files:
 #
 # Generate interface-dependent files
 #
-imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
-print imports
 for im in component['implements']:
 	for f in [ "SERVANT.H", "SERVANT.CPP"]:
 		ofile = outputPath + '/src/' + im.lower() + 'I.' + f.split('.')[-1].lower()

@@ -1,5 +1,37 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+[[[cog
+
+import sys
+sys.path.append('/opt/robocomp/python')
+
+import cog
+def A():
+	cog.out('<@@<')
+def Z():
+	cog.out('>@@>')
+def TAB():
+	cog.out('<TABHERE>')
+
+from parseCDSL import *
+component = CDSLParsing.fromFile(theCDSL)
+if component == None:
+	print('Can\'t locate', theCDSLs)
+	sys.exit(1)
+
+from parseIDSL import *
+
+
+]]]
+[[[end]]]
+ *    Copyright (C) 
+[[[cog
+A()
+import datetime
+cog.out(str(datetime.date.today().year))
+Z()
+]]]
+[[[end]]]
+ by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -19,17 +51,21 @@
 #ifndef GENERICWORKER_H
 #define GENERICWORKER_H
 
-// #include <ipp.h>
 #include "config.h"
 #include <QtGui>
 #include <stdint.h>
 #include <qlog/qlog.h>
+
 #include <CommonBehavior.h>
-#include <Camera.h>
-#include <RGBD.h>
-#include <RGBDBus.h>
-#include <AprilTags.h>
-#include <GetAprilTags.h>
+[[[cog
+
+pool = IDSLPool(theIDSLs)
+for m in pool.modulePool:
+	cog.outl("#include <"+m+".h>")
+
+]]]
+[[[end]]]
+
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -38,15 +74,14 @@ typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
 using namespace std;
 
-/**
-       \brief
-       @author authorname
-*/
-using namespace RoboCompCamera;
-using namespace RoboCompRGBD;
-using namespace RoboCompRGBDBus;
-using namespace RoboCompGetAprilTags;
-using namespace RoboCompAprilTags;
+[[[cog
+
+pool = IDSLPool(theIDSLs)
+for m in pool.modulePool:
+	cog.outl("using namespace "+pool.modulePool[m]['name']+";")
+
+]]]
+[[[end]]]
 
 class GenericWorker : public QObject
 {
@@ -58,7 +93,7 @@ public:
 	virtual void setPeriod(int p);
 	
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
-	QMutex *mutex;                //Shared mutex with servant
+	QMutex *mutex;
 
 	CameraPrx camera_proxy;
 	RGBDPrx rgbd_proxy;

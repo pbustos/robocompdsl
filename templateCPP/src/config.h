@@ -17,7 +17,7 @@ def SPACE(i=0):
 	cog.out('<S'+s+'>')
 
 from parseCDSL import *
-component = CDSLParsing.fromFile(thefile)
+component = CDSLParsing.fromFile(theCDSL)
 
 ]]]
 [[[end]]]
