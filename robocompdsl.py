@@ -7,7 +7,7 @@
 #
 #
 
-import sys, os
+import sys, os, subprocess
 
 # Read input CDSL file
 inputFile  = sys.argv[1]
@@ -54,33 +54,43 @@ def replaceTagsInFile(path):
 	w.close()
 
 
-# SERVANTS
 #genericworker.cpp
-#genericworker.h
 #specificworker.h
 #specificworker.cpp
 
 #
 # Generate regular files
 #
-files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp' ]
+files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h' ]
 for f in files:
 	ofile = outputPath + '/' + f
 	ifile = "templateCPP/" + f
 	print 'Generating', ofile, 'from', ifile
-	os.system("cog.py -z -d -D thefile=" + inputFile + " -o " + ofile + " " + ifile)
+	run = "cog.py -z -d -D thefile=" + inputFile + " -o " + ofile + " " + ifile
+	run = run.split(' ')
+	ret = subprocess.check_call(run)
+	if ret != 0:
+		print 'ERROR'
+		sys.exyt(-1)
 	replaceTagsInFile(outputPath + '/' + f)
 
 
 #
 # Generate interface-dependent files
 #
+imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
+print imports
 for im in component['implements']:
 	for f in [ "SERVANT.H", "SERVANT.CPP"]:
 		ofile = outputPath + '/src/' + im.lower() + 'I.' + f.split('.')[-1].lower()
 		print 'Generating', ofile, ' (servant for', im + ')'
 		# Call cog
-		os.system("cog.py -z -d -D thefile=" + inputFile + " -o " + ofile + " templateCPP/" + f)
+		run = "cog.py -z -d -D theCDSL="+inputFile  + " -D theIDSLs="+imports + " -D theInterface="+im + " -o " + ofile + " " + "templateCPP/" + f
+		run = run.split(' ')
+		ret = subprocess.check_call(run)
+		if ret != 0:
+			print 'ERROR'
+			sys.exyt(-1)
 		replaceTagsInFile(ofile)
 
 

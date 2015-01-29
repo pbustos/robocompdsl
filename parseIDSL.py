@@ -9,7 +9,6 @@ import sys
 debug = False
 #debug = True
 
-
 class IDSLParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
@@ -48,7 +47,7 @@ class IDSLParsing:
 		structDef     = Word("struct")     + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		exceptionDef  = Word("exception")  + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 
-		raiseDef       = Suppress(Word("throws")) + identifier
+		raiseDef       = Suppress(Word("throws")) + identifier + ZeroOrMore( Literal(',') + identifier )
 		decoratorDef    = Literal('idempotent') | Literal('out')
 		retValDef       = identifier.setResultsName('ret')
 
@@ -143,6 +142,49 @@ class IDSLParsing:
 				for p in method['params']:
 					#print p
 					print '         ', '<', p['decorator'], '>  <', p['type'], '>  <', p['name'], '>'
+
+
+
+
+
+
+
+class IDSLPool:
+	def __init__(self, files):
+		self.modulePool = {}
+		pathList = []
+		fileList = []
+		for p in [f for f in files.split('#') if len(f)>0]:
+			if p.startswith("-I"):
+				pathList.append(p[2:])
+			else:
+				fileList.append(p)
+		pathList.append('/home/robocomp/robocomp/interfaces/IDSLs/')
+		#print 'IDSLPool: pathList:', pathList
+		#print 'IDSLPool: fileList:', fileList
+		for f in fileList:
+			namespace = f.split('.')[0]
+			#print namespace
+			for p in pathList:
+				try:
+					path = p+'/'+f
+					#print 'try', path
+					self.modulePool[namespace] = IDSLParsing.fromFile(path)
+					break
+				except IOError, e:
+					pass
+			if not namespace in self.modulePool:
+				print 'Couldn\'t locate ', f
+				sys.exit(-1)
+
+	def moduleProviding(self, interface):
+		for module in self.modulePool:
+			for m in self.modulePool[module]['interfaces']:
+				if m['name'] == interface:
+					return self.modulePool[module]
+		return None
+
+
 
 if __name__ == '__main__':
 	idsl = IDSLParsing.fromFile(sys.argv[1])
