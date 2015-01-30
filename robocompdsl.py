@@ -9,26 +9,42 @@
 
 import sys, os, subprocess
 
-# Read input CDSL file
+if len(sys.argv) < 3:
+	print 'Usage:\n\t'+sys.argv[0]+'   INPUT_FILE.CDSL   OUTPUT_DIRECTORY'
+	sys.exit(-1)
 inputFile  = sys.argv[1]
+outputPath = sys.argv[2]
+
+
 from parseCDSL import *
 component = CDSLParsing.fromFile(inputFile)
 
-
+#########################################
+# Directory structure and other checks  #
+#########################################
+# Function to create directories
+def creaDirectorio(directory):
+	try:
+		print 'Creating', directory,
+		os.mkdir(directory)
+		print ''
+	except:
+		if os.path.isdir(directory):
+			print '(already existed)'
+			pass
+		else:
+			print '\nCOULDN\'T CREATE', directory
+			sys.exit(-1)
 # Check output directory
-outputPath = sys.argv[2]
-
-if os.path.exists(outputPath):
-	print 'can\'t create ', outputPath, 'directory'
-	sys.exit(1)
-
+if not os.path.exists(outputPath):
+	creaDirectorio(outputPath)
+# Create directories within the output directory
 try:
-	os.mkdir(outputPath)
-	os.mkdir(outputPath+"/bin")
-	os.mkdir(outputPath+"/etc")
-	os.mkdir(outputPath+"/src")
+	creaDirectorio(outputPath+"/bin")
+	creaDirectorio(outputPath+"/etc")
+	creaDirectorio(outputPath+"/src")
 except:
-	print 'there was a problem creating a directory'
+	print 'There was a problem creating a directory'
 	sys.exit(1)
 	pass
 
@@ -54,18 +70,21 @@ def replaceTagsInFile(path):
 	w.close()
 
 
-#genericworker.cpp
-#specificworker.h
-#specificworker.cpp
 
 imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
 
 #
 # Generate regular files
 #
-files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h', 'src/genericworker.cpp', 'src/specificworker.h', 'src/specificworker.cpp' ]
+files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h', 'src/genericworker.cpp', 'src/specificworker.h', 'src/specificworker.cpp', 'src/specificmonitor.h', 'src/specificmonitor.cpp' ]
+
+specificFiles = [ 'src/specificworker.h', 'src/specificworker.cpp', 'src/CMakeListsSpecific.txt' ]
+
 for f in files:
 	ofile = outputPath + '/' + f
+	if f in specificFiles and os.path.exists(ofile):
+		print 'Skipping overwriting specific file:', ofile
+		continue
 	ifile = "templateCPP/" + f
 	print 'Generating', ofile, 'from', ifile
 	run = "cog.py -z -d -D theCDSL="+inputFile + " -D theIDSLs="+imports + " -o " + ofile + " " + ifile
@@ -93,11 +112,3 @@ for im in component['implements']+component['subscribesTo']:
 			sys.exyt(-1)
 		replaceTagsInFile(ofile)
 
-
-
-		#w = IMPLEMENTS_STR.replace("<NORMAL>", im).replace("<LOWER>", im.lower())
-		#cog.outl(w)
-
-#for st in component['subscribesTo']:
-	#w = SUBSCRIBESTO_STR.replace("<NORMAL>", st).replace("<LOWER>", st.lower())
-	#cog.out(w)
