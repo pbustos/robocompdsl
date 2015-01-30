@@ -15,7 +15,9 @@ class IDSLParsing:
 		# Open input file
 		#inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
 		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n")])
-		return IDSLParsing.fromString(inputText)
+		ret = IDSLParsing.fromString(inputText)
+		ret['filename'] = filename
+		return ret
 	@staticmethod
 	def fromString(inputText, verbose=False):
 		if verbose: print 'Verbose:', verbose
@@ -69,13 +71,40 @@ class IDSLParsing:
 		return IDSLParsing.module(tree)
 
 	@staticmethod
+	def gimmeIDSL(name, files=''):
+		pathList = []
+		fileList = []
+		for p in [f for f in files.split('#') if len(f)>0]:
+			if p.startswith("-I"):
+				pathList.append(p[2:])
+			else:
+				fileList.append(p)
+		pathList.append('/home/robocomp/robocomp/interfaces/IDSLs/')
+		filename = name.split('.')[0]
+		for p in pathList:
+			try:
+				path = p+'/'+name
+				return IDSLParsing.fromFile(path)
+			except IOError, e:
+				pass
+		print 'Couldn\'t locate ', name
+		sys.exit(-1)
+		
+	@staticmethod
 	def module(tree, start=''):
 		module = {}
 
 		#module name
 		module['name'] = tree['module']['name']
 
-
+		module['imports'] = ''
+		if 'imports' in tree:
+			#print module['name'], tree['imports']
+			for imp in tree['imports']:
+				#print 'proc', imp
+				#print 'has', IDSLParsing.gimmeIDSL(imp)['imports']
+				#print ''
+				module['imports'] += imp + '#' + IDSLParsing.gimmeIDSL(imp)['imports']
 		#print tree['module']['contents']
 		module['interfaces'] = []
 		for contentDef in tree['module']['contents']:
@@ -161,6 +190,7 @@ class IDSLPool:
 				if m['name'] == interface:
 					return self.modulePool[module]
 		return None
+
 
 
 

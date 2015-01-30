@@ -9,6 +9,7 @@ import sys
 debug = False
 #debug = True
 
+from parseIDSL import *
 
 class CDSLParsing:
 	@staticmethod
@@ -82,8 +83,18 @@ class CDSLParsing:
 		component['name'] = tree['component']['name']
 		# Imports
 		component['imports'] = []
+		component['recursiveImports'] = []
 		for imp in tree['imports']:
-			component['imports'] .append(imp)
+			component['imports'].append(imp)
+			
+			#print 'moduleee', imp
+			imp2 = imp.split('/')[-1]
+			component['recursiveImports'] += [imp2]
+			importedModule = IDSLParsing.gimmeIDSL(imp2)
+			component['recursiveImports'] += [x for x in importedModule['imports'].split('#') if len(x)>0]
+			#print 'moduleee', imp, 'done'
+			
+		#print component['recursiveImports']
 		# Language
 		component['language'] = tree['properties']['language'][0]
 		# GUI

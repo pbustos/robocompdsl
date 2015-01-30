@@ -109,24 +109,29 @@ I()
 				
 				paramStrA = ''
 				for p in method['params']:
-					if paramStrA == '': delim = ''
-					else: delim = ', '
-					if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
-					else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
+					if p['decorator'] == 'out':
+						const = ''
+					else:
+						const = 'const '
+					if  p['type'] in [ 'int' ]:
+						ampersand = ''
+					else:
+						ampersand = '&'
+					paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + ', '
 
+					
 				paramStrB = ''
 				for p in method['params']:
 					if paramStrB == '': delim = ''
 					else: delim = ', '
-					if p['decorator'] == 'out': paramStrB += delim + p['name']
-					else: paramStrB += delim + p['name']
+					paramStrB += delim + p['name']
 
-				cog.outl(ret + ' ' + theInterface + '::' + name + '(' + paramStrA + ')')
+				cog.outl(ret + ' ' + theInterface + 'I::' + name + '(' + paramStrA + 'const Ice::Current&)')
 				cog.outl('{')
 				cog.out('<TABHERE>worker->'+name+'(')
 				cog.out(paramStrB)
 				cog.out(');\n')
-				cog.outl('}')
+				cog.outl('}\n')
 
 ]]]
 [[[end]]]

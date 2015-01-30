@@ -103,7 +103,7 @@ for req in component['requires']:
 
 [[[cog
 for pub in component['publishes']:
-	cog.outl("<TABHERE>"+pub+" "    + pub.lower() + ";")
+	cog.outl("<TABHERE>"+pub+"Prx "    + pub.lower() + ";")
 ]]]
 [[[end]]]
 
@@ -119,8 +119,15 @@ if 'implements' in component:
 					for p in method['params']:
 						if paramStrA == '': delim = ''
 						else: delim = ', '
-						if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
-						else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
+						if p['decorator'] == 'out':
+							const = ''
+						else:
+							const = 'const '
+						if  p['type'] in [ 'int' ]:
+							ampersand = ''
+						else:
+							ampersand = '&'
+						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
 					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '(' + paramStrA + ") = 0;")
 ]]]
 [[[end]]]
@@ -137,8 +144,15 @@ if 'subscribesTo' in component:
 					for p in method['params']:
 						if paramStrA == '': delim = ''
 						else: delim = ', '
-						if p['decorator'] == 'out': paramStrA += delim +            p['type'] + ' &' + p['name']
-						else: paramStrA += delim + 'const ' + p['type'] + ' ' + p['name']
+						if p['decorator'] == 'out':
+							const = ''
+						else:
+							const = 'const '
+						if  p['type'] in [ 'int' ]:
+							ampersand = ''
+						else:
+							ampersand = '&'
+						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
 					cog.outl("<TABHERE>virtual " + method['return'] + ' ' + method['name'] + '(' + paramStrA + ") = 0;")
 ]]]
 [[[end]]]

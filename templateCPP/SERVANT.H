@@ -78,7 +78,7 @@ _H
 #include <
 [[[cog
 A()
-cog.out(theInterface)
+cog.out(module['filename'].split('/')[-1].split('.')[0])
 Z()
 ]]]
 [[[end]]]
@@ -87,10 +87,10 @@ Z()
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboComp
+using namespace 
 [[[cog
 A()
-cog.out(theInterface)
+cog.out(module['name'])
 Z()
 ]]]
 [[[end]]]
@@ -136,7 +136,7 @@ cog.out(theInterface)
 Z()
 ]]]
 [[[end]]]
-();
+I();
 	
 [[[cog
 
@@ -150,14 +150,17 @@ Z()
 				
 				paramStr = ''
 				for p in method['params']:
-					if paramStr == '': delim = ''
-					else: delim = ', '
 					if p['decorator'] == 'out':
-						paramStr += delim +            p['type'] + ' &' + p['name']
+						const = ''
 					else:
-						paramStr += delim + 'const ' + p['type'] + ' ' + p['name']
+						const = 'const '
+					if  p['type'] in [ 'int' ]:
+						ampersand = ''
+					else:
+						ampersand = '&'
+					paramStr += const + p['type'] + ' ' + ampersand + p['name'] + ', '
 
-				cog.outl('<TABHERE>' + ret + ' ' + name + '(' + paramStr + ');')
+				cog.outl('<TABHERE>' + ret + ' ' + name + '(' + paramStr + 'const Ice::Current&);')
 
 ]]]
 [[[end]]]

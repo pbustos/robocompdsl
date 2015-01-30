@@ -42,39 +42,41 @@ INCLUDE ( CMakeListsSpecific.txt)
 # Sources set
 SET ( SOURCES
   ${SOURCES}
+  $ENV{ROBOCOMP}/classes/rapplication/rapplication.cpp
+  $ENV{ROBOCOMP}/classes/qlog/qlog.cpp
   main.cpp
+  genericmonitor.cpp
+  specificmonitor.cpp
+  commonbehaviorI.cpp
+  genericworker.cpp
+  specificworker.cpp
 [[[cog
 for im in component['implements'] + component['subscribesTo']:
 	cog.outl('<S2>' + im.lower() + 'I.cpp')
 ]]]
 [[[end]]]
-  genericmonitor.cpp
-  commonbehaviorI.cpp
-  genericworker.cpp
-  $ENV{ROBOCOMP}/classes/rapplication/rapplication.cpp
-  $ENV{ROBOCOMP}/classes/qlog/qlog.cpp
 )
 
 # Headers set
 SET ( HEADERS
   ${HEADERS}
-
-[[[cog
-for im in component['implements'] + component['subscribesTo']:
-		cog.outl('<S2>'+im.lower() + 'I.cpp')
-]]]
-[[[end]]]
-
   genericmonitor.h
+  specificmonitor.h
   commonbehaviorI.h
   genericworker.h
+  specificworker.h
+[[[cog
+for im in component['implements'] + component['subscribesTo']:
+		cog.outl('<S2>'+im.lower() + 'I.h')
+]]]
+[[[end]]]
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 ROBOCOMP_WRAP_ICE( CommonBehavior 
 [[[cog
 A()
-for im in component['imports']:
+for im in component['recursiveImports']:
 	cog.out(im.split('/')[-1].split('.')[0] + ' ')
 Z()
 ]]]
@@ -113,7 +115,7 @@ ${QT_LIBRARIES} ${LIBS} ${STATIC_LIBS} ${SPECIFIC_LIBS})
 INSTALL(FILES ${EXECUTABLE_OUTPUT_PATH}/
 [[[cog
 A()
-cog.out(' ' + component['name'] + ' ')
+cog.out(component['name'] + ' ')
 Z()
 ]]]
 [[[end]]]

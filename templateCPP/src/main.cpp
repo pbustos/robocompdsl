@@ -19,7 +19,7 @@ component = CDSLParsing.fromFile(theCDSL)
 REQUIRE_STR = """
 <TABHERE>try
 <TABHERE>{
-<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>::uncheckedCast( communicator()->stringToProxy( getProxyString("<NORMAL>Proxy") ) );
+<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>Prx::uncheckedCast( communicator()->stringToProxy( getProxyString("<NORMAL>Proxy") ) );
 <TABHERE>}
 <TABHERE>catch(const Ice::Exception& ex)
 <TABHERE>{
@@ -339,15 +339,6 @@ for st in component['subscribesTo']:
 	cog.out(w)
 ]]]
 [[[end]]]
-
-
-		// Server adapter creation and publication
-		Ice::ObjectAdapterPtr adapterGetAprilTags = communicator()->createObjectAdapter("GetAprilTagsComp");
-		GetAprilTagsI *getapriltags = new GetAprilTagsI(worker);
-		adapterGetAprilTags->add(getapriltags, communicator()->stringToIdentity("getapriltags"));
-		adapterGetAprilTags->activate();
-
-
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;

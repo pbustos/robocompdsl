@@ -63,7 +63,7 @@ imports = ''.join( [ imp.split('/')[-1]+'#' for imp in component['imports'] ] )
 #
 # Generate regular files
 #
-files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h', 'src/genericworker.cpp' ]
+files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.cpp', 'src/CMakeLists.txt', 'src/CMakeListsSpecific.txt', 'src/commonbehaviorI.h', 'src/commonbehaviorI.cpp', 'src/genericmonitor.h', 'src/genericmonitor.cpp', 'src/config.h', 'src/specificmonitor.h', 'src/specificmonitor.cpp', 'src/genericworker.h', 'src/genericworker.cpp', 'src/specificworker.h', 'src/specificworker.cpp' ]
 for f in files:
 	ofile = outputPath + '/' + f
 	ifile = "templateCPP/" + f
@@ -80,7 +80,7 @@ for f in files:
 #
 # Generate interface-dependent files
 #
-for im in component['implements']:
+for im in component['implements']+component['subscribesTo']:
 	for f in [ "SERVANT.H", "SERVANT.CPP"]:
 		ofile = outputPath + '/src/' + im.lower() + 'I.' + f.split('.')[-1].lower()
 		print 'Generating', ofile, ' (servant for', im + ')'
