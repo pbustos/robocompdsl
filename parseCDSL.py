@@ -2,7 +2,7 @@
 
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
 from pyparsing import cppStyleComment, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
-from pyparsing import nestedExpr
+from pyparsing import nestedExpr, CaselessLiteral
 
 import sys, traceback, os
 
@@ -50,7 +50,7 @@ class CDSLParsing:
 		communicationList = implementsList | requiresList | subscribesList | publishesList
 		communications = Group( Suppress(Word("Communications")) + op + ZeroOrMore(communicationList) + cl + semicolon)
 		# Language
-		language = Suppress(Word("language")) + (Word("Cpp")|Word("Python")) + semicolon
+		language = Suppress(Word("language")) + (CaselessLiteral("cpp")|CaselessLiteral("python")) + semicolon
 		# GUI
 		gui = Optional(Group( Word("gui") + Word("Qt") + opp + identifier + clp + semicolon ))
 		
