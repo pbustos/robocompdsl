@@ -1,7 +1,106 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#    Copyright (C) 2010 by RoboLab
+[[[cog
+
+import sys
+sys.path.append('/opt/robocomp/python')
+
+import cog
+def A():
+	cog.out('<@@<')
+def Z():
+	cog.out('>@@>')
+def TAB():
+	cog.out('<TABHERE>')
+
+from parseCDSL import *
+component = CDSLParsing.fromFile(theCDSL)
+
+
+REQUIRE_STR = """
+<TABHERE>try
+<TABHERE>{
+<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>Prx::uncheckedCast( communicator()->stringToProxy( getProxyString("<NORMAL>Proxy") ) );
+<TABHERE>}
+<TABHERE>catch(const Ice::Exception& ex)
+<TABHERE>{
+<TABHERE><TABHERE>cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+<TABHERE><TABHERE>return EXIT_FAILURE;
+<TABHERE>}
+<TABHERE>rInfo("<NORMAL>Proxy initialized Ok!");
+<TABHERE>mprx["<NORMAL>Proxy"] = (::IceProxy::Ice::Object*)(&<LOWER>_proxy);//Remote server proxy creation example
+"""
+
+SUBSCRIBESTO_STR = """
+<TABHERE><TABHERE>// Server adapter creation and publication
+<TABHERE><TABHERE>Ice::ObjectAdapterPtr <NORMAL>_adapter = communicator()->createObjectAdapter("<NORMAL>Topic");
+<TABHERE><TABHERE><NORMAL>Ptr <LOWER>I_ = new <NORMAL>I(worker);
+<TABHERE><TABHERE>Ice::ObjectPrx <LOWER>_proxy = <NORMAL>_adapter->addWithUUID(<LOWER>I_)->ice_oneway();
+<TABHERE><TABHERE>IceStorm::TopicPrx <LOWER>_topic;
+<TABHERE><TABHERE>if(!<LOWER>_topic){
+<TABHERE><TABHERE>try {
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch (const IceStorm::TopicExists&) {
+<TABHERE><TABHERE>//Another client created the topic
+<TABHERE><TABHERE>try{
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch(const IceStorm::NoSuchTopic&)
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE>//Error. Topic does not exist
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>IceStorm::QoS qos;
+<TABHERE><TABHERE><LOWER>_topic->subscribeAndGetPublisher(qos, <LOWER>_proxy);
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE><NORMAL>_adapter->activate();
+"""
+
+PUBLISHES_STR = """
+<TABHERE>IceStorm::TopicPrx <LOWER>_topic;
+<TABHERE>while (!<LOWER>_topic)
+<TABHERE>{
+<TABHERE><TABHERE>try
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
+<TABHERE><TABHERE>}
+<TABHERE><TABHERE>catch (const IceStorm::NoSuchTopic&)
+<TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE>try
+<TABHERE><TABHERE><TABHERE>{
+<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE><TABHERE>catch (const IceStorm::TopicExists&){
+<TABHERE><TABHERE><TABHERE><TABHERE>// Another client created the topic.
+<TABHERE><TABHERE><TABHERE>}
+<TABHERE><TABHERE>}
+<TABHERE>}
+<TABHERE>Ice::ObjectPrx <LOWER>_pub = <LOWER>_topic->getPublisher()->ice_oneway();
+<TABHERE><NORMAL>Prx <LOWER> = <NORMAL>Prx::uncheckedCast(<LOWER>_pub);
+<TABHERE>mprx["<NORMAL>Pub"] = (::IceProxy::Ice::Object*)(&<LOWER>);
+"""
+
+IMPLEMENTS_STR = """
+<TABHERE><TABHERE>// Server adapter creation and publication
+<TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = communicator()->createObjectAdapter("<NORMAL>Comp");
+<TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
+<TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, communicator()->stringToIdentity("<LOWER>"));
+"""
+
+]]]
+[[[end]]]
+
+
+#    Copyright (C) 2010 by 
+[[[cog
+A()
+import datetime
+cog.out(str(datetime.date.today().year))
+Z()
+]]]
+[[[end]]]
 #
 #    This file is part of RoboComp
 #
@@ -19,7 +118,7 @@
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-## \mainpage RoboComp::speechComp
+ # \mainpage RoboComp::speechComp
  #
  # \section intro_sec Introduction
  #
