@@ -40,6 +40,8 @@ if not os.path.exists(outputPath):
 	creaDirectorio(outputPath)
 # Create directories within the output directory
 try:
+	if component['language'].lower() == 'cpp':
+		print 'CPP, creamos bin'
 	creaDirectorio(outputPath+"/bin")
 	creaDirectorio(outputPath+"/etc")
 	creaDirectorio(outputPath+"/src")

@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+	#!/usr/bin/env python
 
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
 from pyparsing import cppStyleComment, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
 from pyparsing import nestedExpr
 
-import sys
+import sys, traceback, os
 
 debug = False
 #debug = True
@@ -15,8 +15,17 @@ class CDSLParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
 		# Open input file
-		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
-		return CDSLParsing.fromString(inputText)
+		#inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
+		inputText = open(filename, 'r').read()
+		try:
+			ret = CDSLParsing.fromString(inputText)
+		except:
+			print 'Error reading', filename
+			traceback.print_exc()
+			print 'Error reading', filename
+			sys.exit(1)
+		ret['filename'] = filename
+		return ret
 	@staticmethod
 	def fromString(inputText, verbose=False):
 		if verbose: print 'Verbose:', verbose
@@ -49,9 +58,8 @@ class CDSLParsing:
 		component = Suppress(Word("Component")) + identifier.setResultsName("name") + op + componentContents.setResultsName("properties") + cl + semicolon		
 
 		CDSL = idslImports.setResultsName("imports") + component.setResultsName("component")
+		CDSL.ignore( cppStyleComment )
 		tree = CDSL.parseString(text)
-
-
 		return CDSLParsing.component(tree)
 
 	@staticmethod
@@ -90,7 +98,14 @@ class CDSLParsing:
 			#print 'moduleee', imp
 			imp2 = imp.split('/')[-1]
 			component['recursiveImports'] += [imp2]
-			importedModule = IDSLParsing.gimmeIDSL(imp2)
+			try:
+				importedModule = IDSLParsing.gimmeIDSL(imp2)
+			except:
+				print 'Error reading IMPORT', imp2
+				traceback.print_exc()
+				print 'Error reading IMPORT', imp2
+				os._exit(1)
+
 			component['recursiveImports'] += [x for x in importedModule['imports'].split('#') if len(x)>0]
 			#print 'moduleee', imp, 'done'
 			

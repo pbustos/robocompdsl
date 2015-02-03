@@ -2,27 +2,35 @@
 
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
 from pyparsing import cppStyleComment, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
-from pyparsing import nestedExpr
+from pyparsing import nestedExpr, ParseException
 
-import sys
+import sys, traceback, os
 
 debug = False
 #debug = True
+
+
 
 class IDSLParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
 		# Open input file
 		#inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('//')])
-		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n")])
-		ret = IDSLParsing.fromString(inputText)
+		inputText = open(filename, 'r').read()
+		try:
+			ret = IDSLParsing.fromString(inputText)
+		except ParseException, p:
+			print 'Error reading IDSL', filename
+			traceback.print_exc()
+			print 'Error reading IDSL', filename
+			print p.markInputline()
+			os._exit(1)
 		ret['filename'] = filename
 		return ret
 	@staticmethod
 	def fromString(inputText, verbose=False):
 		if verbose: print 'Verbose:', verbose
-		#text = nestedExpr("/*", "*/").suppress().transformString(inputText)
-		text = inputText
+		text = nestedExpr("/*", "*/").suppress().transformString(inputText)
 
 		semicolon = Suppress(Word(";"))
 		quote     = Suppress(Word("\""))
@@ -47,27 +55,24 @@ class IDSLParsing:
 		structDef     = Word("struct")     + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 		exceptionDef  = Word("exception")  + identifier.setResultsName('name') + op + CharsNotIn("{}") + cl + semicolon
 
-		raiseDef       = Suppress(Word("throws")) + identifier + ZeroOrMore( Literal(',') + identifier )
+		raiseDef       = Suppress(Word("throws")) + typeIdentifier + ZeroOrMore( Literal(',') + typeIdentifier )
 		decoratorDef    = Literal('idempotent') | Literal('out')
-		retValDef       = identifier.setResultsName('ret')
+		retValDef       = typeIdentifier.setResultsName('ret')
 
 		firstParam    = Group( Optional(decoratorDef.setResultsName('decorator')) + typeIdentifier.setResultsName('type') + identifier.setResultsName('name'))
 		nextParam     = Suppress(Word(',')) + firstParam
 		params        = firstParam + ZeroOrMore(nextParam)
 
 
-		remoteMethodDef  = Group(Optional(decoratorDef) + retValDef +  identifier.setResultsName('name') + opp + Optional(          params).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
-		interfaceDef    = Word("interface")  + identifier.setResultsName('name') + op + Group(ZeroOrMore(remoteMethodDef)) + cl + semicolon
+		remoteMethodDef  = Group(Optional(decoratorDef) + retValDef + typeIdentifier.setResultsName('name') + opp + Optional(          params).setResultsName('params') + clp + Optional(raiseDef) + semicolon )
+		interfaceDef    = Word("interface")  + typeIdentifier.setResultsName('name') + op + Group(ZeroOrMore(remoteMethodDef)) + cl + semicolon
 
 		moduleContent = Group(structDef | enumDef | exceptionDef | dictionaryDef | sequenceDef | interfaceDef)
 		module = Suppress(Word("module")) + identifier.setResultsName("name") + op + ZeroOrMore(moduleContent).setResultsName("contents") + cl + semicolon
 
 		IDSL = idslImports.setResultsName("imports") + module.setResultsName("module")
 		IDSL.ignore( cppStyleComment )
-
-
 		tree = IDSL.parseString(text)
-
 		return IDSLParsing.module(tree)
 
 	@staticmethod
