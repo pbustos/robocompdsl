@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 [[[cog
 
 import sys
@@ -88,17 +87,14 @@ IMPLEMENTS_STR = """
 <TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
 <TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, communicator()->stringToIdentity("<LOWER>"));
 """
-
 ]]]
 [[[end]]]
-
 
 #    Copyright (C) 2010 by 
 [[[cog
 A()
 import datetime
 cog.out(str(datetime.date.today().year))
-Z()
 ]]]
 [[[end]]]
 #
@@ -118,42 +114,52 @@ Z()
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
- # \mainpage RoboComp::speechComp
- #
- # \section intro_sec Introduction
- #
- # speechComp, speech synthesis from text using the Festival speech synthesis software.
- #
- # \section interface_sec Interface
- #
- # speechComp interface provide one method for converting text to speech.
- #
- # \section install_sec Installation
- #
- # \subsection install1_ssec Software depencences
- # speechComp need Festival. sudo aptitude install festival.
- #
- # \subsection install2_ssec Compile and install
- # cd Tools/speechComp
- # <br>
- # It's an python component so no need compilation.
- #
- # \section guide_sec User guide
- #
- # \subsection config_ssec Configuration file
- #
- # <p>
- # The configuration file speechComp/etc/config.
- # </p>
- #
- # \subsection execution_ssec Execution
- #
- # Just: "${PATH_TO_BINARY}/speechComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
- #
- # \subsection running_ssec Once running
- #
- #
- #
+# \mainpage RoboComp::
+[[[cog
+A()
+cog.out(component['name'])
+]]]
+[[[end]]]
+#
+# \section intro_sec Introduction
+#
+# Some information about the component...
+#
+# \section interface_sec Interface
+#
+# Descroption of the interface provided...
+#
+# \section install_sec Installation
+#
+# \subsection install1_ssec Software depencences
+# Software dependences....
+#
+# \subsection install2_ssec Compile and install
+# How to compile/install the component...
+#
+# \section guide_sec User guide
+#
+# \subsection config_ssec Configuration file
+#
+# <p>
+# The configuration file...
+# </p>
+#
+# \subsection execution_ssec Execution
+#
+# Just: "${PATH_TO_BINARY}/
+[[[cog
+A()
+cog.out(component['name'])
+Z()
+]]]
+[[[end]]]
+ --Ice.Config=${PATH_TO_CONFIG_FILE}"
+#
+# \subsection running_ssec Once running
+#
+#
+#
 
 import sys, traceback, Ice, subprocess, threading, time, Queue, os
 
@@ -166,9 +172,19 @@ if len(ROBOCOMP)<1:
 	print 'ROBOCOMP environment variable not set! Exiting.'
 	sys.exit()
 
-Ice.loadSlice(ROBOCOMP+"/interfaces/Speech.ice")
-Ice.loadSlice(ROBOCOMP+"/interfaces/AprilTags.ice")
-Ice.loadSlice(ROBOCOMP+"/interfaces/CommonBehavior.ice")
+
+[[[cog
+A()
+for imp in component['imports']:
+	print (imp)
+	module = IDSLParsing.gimmeIDSL(imp.split('/')[-1])
+	incl = imp.split('/')[-1].split('.')[0]
+	cog.outl('Ice.loadSlice(ROBOCOMP+"/interfaces/'+incl+'.ice")')
+	cog.outl('import '+module['name']+'')
+Z()
+]]]
+[[[end]]]
+
 
 import RoboCompSpeech
 import RoboCompAprilTags
