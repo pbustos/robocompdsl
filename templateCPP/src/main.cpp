@@ -89,7 +89,7 @@ IMPLEMENTS_STR = """
 
 ]]]
 [[[end]]]
- *    Copyright (C) 
+ *    Copyright (C)
 [[[cog
 A()
 import datetime
@@ -125,7 +125,7 @@ cog.out(component['name'])
  *
  * \section intro_sec Introduction
  *
- * The 
+ * The
 [[[cog
 A()
 cog.out(' ' + component['name'])
@@ -297,7 +297,7 @@ for rq in component['requires']:
 [[[end]]]
 
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
-	
+
 
 [[[cog
 for pb in component['publishes']:
@@ -306,14 +306,14 @@ for pb in component['publishes']:
 ]]]
 [[[end]]]
 
-	
+
 	GenericWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
 	GenericMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor,SIGNAL(kill()),&a,SLOT(quit()));
 	QObject::connect(worker,SIGNAL(kill()),&a,SLOT(quit()));
 	monitor->start();
-	
+
 	if ( !monitor->isRunning() )
 		return status;
 	try
@@ -373,7 +373,7 @@ int main(int argc, char* argv[])
 {
 	bool hasConfig = false;
 	string arg;
-	
+
 [[[cog
 A()
 cog.out(' ' + component['name'] + ' ')

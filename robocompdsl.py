@@ -89,7 +89,6 @@ if component['language'].lower() == 'cpp':
 		ifile = "templateCPP/" + f
 		print 'Generating', ofile, 'from', ifile
 		run = "cog.py -z -d -D theCDSL="+inputFile + " -D theIDSLs="+imports + " -o " + ofile + " " + ifile
-		print run
 		run = run.split(' ')
 		ret = subprocess.check_call(run)
 		if ret != 0:

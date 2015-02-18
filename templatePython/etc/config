@@ -3,6 +3,9 @@ AprilTagsTopic.Endpoints=tcp -p 12021
 
 TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
 
+DifferentialRobotProxy=differentialrobot:tcp -p 10004
+
+
 # Component properties
 #
 Ice.Warn.Connections=0

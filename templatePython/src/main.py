@@ -16,20 +16,22 @@ def TAB():
 from parseCDSL import *
 component = CDSLParsing.fromFile(theCDSL)
 
+import specificworker
 
 REQUIRE_STR = """
+<TABHERE><TABHERE><TABHERE># Remote object connection for <NORMAL>
 <TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = ic.getProperties().getProperty('<NORMAL>Proxy')
-<TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = self.communicator().getProperties().getProperty('<NORMAL>Proxy')
+<TABHERE><TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.communicator().stringToProxy(proxyString)
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>self.<LOWER>_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>mprx["<NORMAL>Proxy"] = self.<LOWER>_proxy
+<TABHERE><TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object.'
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>return
+<TABHERE><TABHERE><TABHERE>except Ice.Exception, e:
+<TABHERE><TABHERE><TABHERE><TABHERE>print e
 <TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot get <NORMAL>Proxy property.'
-<TABHERE><TABHERE><TABHERE><TABHERE>return
-
-<TABHERE><TABHERE><TABHERE># Remote object connection
-<TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.communicator().stringToProxy(proxyString)
-<TABHERE><TABHERE><TABHERE><TABHERE>self.lower_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
-<TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object.'
 <TABHERE><TABHERE><TABHERE><TABHERE>return
 """
 
@@ -119,13 +121,15 @@ IMPLEMENTS_STR = """
 ]]]
 [[[end]]]
 
-#    Copyright (C) 2010 by
+#    Copyright (C)
 [[[cog
 A()
 import datetime
 cog.out(str(datetime.date.today().year))
+Z()
 ]]]
 [[[end]]]
+ by YOUR NAME HERE
 #
 #    This file is part of RoboComp
 #
@@ -190,7 +194,7 @@ Z()
 #
 #
 
-import sys, traceback, Ice, subprocess, threading, time, Queue, os
+import sys, traceback, Ice, IceStorm, subprocess, threading, time, Queue, os
 
 ROBOCOMP = ''
 try:
@@ -202,22 +206,18 @@ if len(ROBOCOMP)<1:
 	sys.exit()
 
 
+preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
+Ice.loadSlice(preStr+"CommonBehavior.ice")
+import RoboCompCommonBehavior
 [[[cog
-A()
 for imp in component['imports']:
 	print (imp)
 	module = IDSLParsing.gimmeIDSL(imp.split('/')[-1])
 	incl = imp.split('/')[-1].split('.')[0]
-	cog.outl('Ice.loadSlice(ROBOCOMP+"/interfaces/'+incl+'.ice")')
+	cog.outl('Ice.loadSlice(preStr+"'+incl+'.ice")')
 	cog.outl('import '+module['name']+'')
-Z()
 ]]]
 [[[end]]]
-
-
-import IceStorm
-
-
 
 
 class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
@@ -249,15 +249,9 @@ class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
 class MainClass (Ice.Application):
 	def run (self, argv):
 		status = 0
+		mprx = {}
 		try:
 			self.shutdownOnInterrupt()
-
-[[[cog
-for rq in component['requires'] + component['publishes']:
-	req = rq.split('/')[-1].split('.')[0]
-	cog.outl('<TABHERE>'+req+'Prx '+req.lower() +'_proxy;')
-]]]
-[[[endl]]]
 
 [[[cog
 for rq in component['requires']:
@@ -266,10 +260,18 @@ for rq in component['requires']:
 ]]]
 [[[end]]]
 
-	# Topic Manager
-	proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
-	obj = self.communicator().stringToProxy(proxy)
-	topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+[[[cog
+try:
+	if len(component['publishes']) > 0 or len(component['subscribes']) > 0:
+		cog.outl("""
+<TABHERE><TABHERE># Topic Manager
+<TABHERE><TABHERE>proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
+<TABHERE><TABHERE>obj = self.communicator().stringToProxy(proxy)
+<TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
+except:
+	pass
+]]]
+[[[end]]]
 
 
 [[[cog
@@ -280,10 +282,8 @@ for pb in component['publishes']:
 [[[end]]]
 
 
-
-
-
-
+			worker = SpecificWorker(mprx);
+			connect(worker, SIGNAL(kill()), a, SLOT(quit()));
 
 			self.communicator().waitForShutdown()
 		except:
@@ -297,4 +297,4 @@ for pb in component['publishes']:
 				traceback.print_exc()
 				status = 1
 
-Server( ).main(sys.argv)
+MainClass( ).main(sys.argv)
