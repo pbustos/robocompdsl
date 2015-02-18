@@ -18,46 +18,68 @@ component = CDSLParsing.fromFile(theCDSL)
 
 
 REQUIRE_STR = """
-<TABHERE>try
-<TABHERE>{
-<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>Prx::uncheckedCast( communicator()->stringToProxy( getProxyString("<NORMAL>Proxy") ) );
-<TABHERE>}
-<TABHERE>catch(const Ice::Exception& ex)
-<TABHERE>{
-<TABHERE><TABHERE>cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-<TABHERE><TABHERE>return EXIT_FAILURE;
-<TABHERE>}
-<TABHERE>rInfo("<NORMAL>Proxy initialized Ok!");
-<TABHERE>mprx["<NORMAL>Proxy"] = (::IceProxy::Ice::Object*)(&<LOWER>_proxy);//Remote server proxy creation example
+<TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = ic.getProperties().getProperty('<NORMAL>Proxy')
+<TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot get <NORMAL>Proxy property.'
+<TABHERE><TABHERE><TABHERE><TABHERE>return
+
+<TABHERE><TABHERE><TABHERE># Remote object connection
+<TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.communicator().stringToProxy(proxyString)
+<TABHERE><TABHERE><TABHERE><TABHERE>self.lower_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
+<TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object.'
+<TABHERE><TABHERE><TABHERE><TABHERE>return
 """
 
 SUBSCRIBESTO_STR = """
-<TABHERE><TABHERE>// Server adapter creation and publication
-<TABHERE><TABHERE>Ice::ObjectAdapterPtr <NORMAL>_adapter = communicator()->createObjectAdapter("<NORMAL>Topic");
-<TABHERE><TABHERE><NORMAL>Ptr <LOWER>I_ = new <NORMAL>I(worker);
-<TABHERE><TABHERE>Ice::ObjectPrx <LOWER>_proxy = <NORMAL>_adapter->addWithUUID(<LOWER>I_)->ice_oneway();
-<TABHERE><TABHERE>IceStorm::TopicPrx <LOWER>_topic;
-<TABHERE><TABHERE>if(!<LOWER>_topic){
-<TABHERE><TABHERE>try {
-<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
-<TABHERE><TABHERE>}
-<TABHERE><TABHERE>catch (const IceStorm::TopicExists&) {
-<TABHERE><TABHERE>//Another client created the topic
-<TABHERE><TABHERE>try{
-<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
-<TABHERE><TABHERE>}
-<TABHERE><TABHERE>catch(const IceStorm::NoSuchTopic&)
-<TABHERE><TABHERE>{
-<TABHERE><TABHERE><TABHERE>//Error. Topic does not exist
-<TABHERE><TABHERE><TABHERE>}
-<TABHERE><TABHERE>}
-<TABHERE><TABHERE>IceStorm::QoS qos;
-<TABHERE><TABHERE><LOWER>_topic->subscribeAndGetPublisher(qos, <LOWER>_proxy);
-<TABHERE><TABHERE>}
-<TABHERE><TABHERE><NORMAL>_adapter->activate();
+<TABHERE><TABHERE><TABHERE># Server adapter creation and publication
+<TABHERE><TABHERE><TABHERE>proxy = self.communicator().getProperties().getProperty( "TopicManager.Proxy")
+<TABHERE><TABHERE><TABHERE>print proxy
+<TABHERE><TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
+<TABHERE><TABHERE><TABHERE>print topicManager
+
+<TABHERE><TABHERE><TABHERE><NORMAL>_adapter = self.communicator().createObjectAdapter("<NORMAL>Topic")
+<TABHERE><TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(handler, self.communicator)
+<TABHERE><TABHERE><TABHERE><LOWER>_proxy = <NORMAL>_adapter.addWithUUID(<LOWER>I_).ice_oneway()
+
+<TABHERE><TABHERE><TABHERE>subscribeDone = False
+<TABHERE><TABHERE><TABHERE>while not subscribeDone:
+<TABHERE><TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.create("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
+<TABHERE><TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.retrieve("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>except e:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print e
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print "Error. Topic does not exist"
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>sys.exit(-1)
+<TABHERE><TABHERE><TABHERE>qos = {}
+<TABHERE><TABHERE><TABHERE><LOWER>_topic.subscribeAndGetPublisher(qos, <LOWER>_proxy)
+<TABHERE><TABHERE><TABHERE><NORMAL>_adapter.activate()
 """
 
 PUBLISHES_STR = """
+<TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE>topic = False
+<TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("<NORMAL>")
+<TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE>pass
+<TABHERE><TABHERE><TABHERE>while not topic:
+<TABHERE><TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("AprilTagsTopic")
+<TABHERE><TABHERE><TABHERE><TABHERE>except IceStorm.NoSuchTopic:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.create("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Another client created the <NORMAL> topic... ok'
+<TABHERE><TABHERE><TABHERE>pub = topic.getPublisher().ice_oneway()
+<TABHERE><TABHERE><TABHERE>executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+
+
 <TABHERE>IceStorm::TopicPrx <LOWER>_topic;
 <TABHERE>while (!<LOWER>_topic)
 <TABHERE>{
@@ -82,6 +104,13 @@ PUBLISHES_STR = """
 """
 
 IMPLEMENTS_STR = """
+<TABHERE><TABHERE><TABHERE>handler = <NORMAL>I()
+<TABHERE><TABHERE><TABHERE>handler.start()
+<TABHERE><TABHERE><TABHERE>adapter = self.communicator().createObjectAdapter('<NORMAL>Comp')
+<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), self.communicator().stringToIdentity('<LOWER>'))
+#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), self.communicator().stringToIdentity('commonbehavior'))
+<TABHERE><TABHERE><TABHERE>adapter.activate()
+
 <TABHERE><TABHERE>// Server adapter creation and publication
 <TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = communicator()->createObjectAdapter("<NORMAL>Comp");
 <TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
@@ -90,7 +119,7 @@ IMPLEMENTS_STR = """
 ]]]
 [[[end]]]
 
-#    Copyright (C) 2010 by 
+#    Copyright (C) 2010 by
 [[[cog
 A()
 import datetime
@@ -186,86 +215,10 @@ Z()
 [[[end]]]
 
 
-import RoboCompSpeech
-import RoboCompAprilTags
-import RoboCompCommonBehavior
-
 import IceStorm
 
 
-sleep_time = 0.1
-max_queue = 100
-charsToAvoid = ["'", '"', '{', '}', '[', '<', '>', '(', ')', '&', '$', '|', '#']
 
-class SpeechHandler (threading.Thread):
-	def __init__(self):
-		threading.Thread.__init__(self)
-		self.text_queue = Queue.Queue(max_queue)
-		self.accessLock = threading.Lock()
-		self.initTime = time.time()
-	def run (self):
-		while 1:
-			self.accessLock.acquire()
-			if self.text_queue.empty():
-				self.accessLock.release()
-				time.sleep(sleep_time)
-			else:
-				text_to_say = self.text_queue.get()
-				self.accessLock.release()
-				for rep in charsToAvoid:
-					text_to_say = text_to_say.replace(rep, '\\'+rep)
-				shellcommand = "echo " + text_to_say  + " | padsp festival --tts"
-				print 'Order: ' + text_to_say
-				print 'Shell: "' + shellcommand + '"'
-				os.system(shellcommand)
-	def put (self, new_text, force):
-		self.accessLock.acquire()
-		if force:
-			os.system("killall -9 festival")
-			os.system("killall -9 aplay")
-			self.text_queue = Queue.Queue(max_queue)
-		self.text_queue.put(new_text)
-		self.accessLock.release()
-
-	def getFreq(self):
-		return 5
-
-	def setFreq(self, freq):
-		print "Setting freq of acpi"
-
-	def timeAwake(self):
-		timeA=int(time.time()-self.initTime)
-		type(timeA)
-		return timeA
-
-
-	def killYourSelf(self):
-		print "Killing acpi component"
-
-	def getAttrList(self, communicator):
-		#~ attrList = dict()
-		print "Obteniendo property dict"
-		propertydict=communicator().getProperties().getPropertiesForPrefix("")
-		print len(propertydict)
-		attrList= []
-		for k, v in propertydict.iteritems():
-			attr= RoboCompCommonBehavior.AttrPair()
-			attr.name=k
-			attr.value=v
-			attrList.append(attr)
-		return attrList
-
-class SpeechI (RoboCompSpeech.Speech):
-	def __init__(self,_handler):
-		self.handler = _handler
-	def say(self, text, force, current=None):
-		print text
-		try:
-			self.handler.put(text, force)
-		except:
-			print 'Full queue.'
-	def isBusy(self, current=None):
-		return 'festival' in subprocess.Popen(["ps", "ax"], stdout=subprocess.PIPE).communicate()[0]
 
 class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
 	def __init__(self, _handler, _communicator):
@@ -292,78 +245,44 @@ class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
 			return
 
 
-class AprilTagsI (RoboCompAprilTags.AprilTags):
-	def __init__(self, _handler, _communicator):
-		self.handler = _handler
-		self.communicator = _communicator
-	def newAprilTag(self, tags, current = None):
-		print 't'
 
-
-class Server (Ice.Application):
+class MainClass (Ice.Application):
 	def run (self, argv):
 		status = 0
 		try:
 			self.shutdownOnInterrupt()
 
+[[[cog
+for rq in component['requires'] + component['publishes']:
+	req = rq.split('/')[-1].split('.')[0]
+	cog.outl('<TABHERE>'+req+'Prx '+req.lower() +'_proxy;')
+]]]
+[[[endl]]]
 
-			# Proxy to publish AGMExecutiveTopic
-			proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
-			obj = self.communicator().stringToProxy(proxy)
-			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
-			try:
-				topic = False
-				topic = topicManager.retrieve("AprilTagsTopic")
-			except:
-				pass
-			while not topic:
-				try:
-					topic = topicManager.retrieve("AprilTagsTopic")
-				except IceStorm.NoSuchTopic:
-					try:
-						topic = topicManager.create("AprilTagsTopic")
-					except:
-						print 'Another client created the AprilTagsTopic topic... ok'
-			pub = topic.getPublisher().ice_oneway()
-			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+[[[cog
+for rq in component['requires']:
+	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
+
+	# Topic Manager
+	proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
+	obj = self.communicator().stringToProxy(proxy)
+	topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
 
 
+[[[cog
+for pb in component['publishes']:
+	w = PUBLISHES_STR.replace("<NORMAL>", pb).replace("<LOWER>", pb.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
 
-			handler= SpeechHandler()
-			handler.start()
-			adapter = self.communicator().createObjectAdapter('SpeechComp')
-			adapter.add(SpeechI(handler), self.communicator().stringToIdentity('speech'))
-			adapter.add(CommonBehaviorI(handler, self.communicator), self.communicator().stringToIdentity('commonbehavior'))
-			adapter.activate()
 
 
-			# Server adapter creation and publication
-			proxy = self.communicator().getProperties().getProperty( "TopicManager.Proxy")
-			print proxy
-			topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
-			print topicManager
 
-			AprilTags_adapter = self.communicator().createObjectAdapter("AprilTagsTopic")
-			apriltagsI_ = AprilTagsI(handler, self.communicator)
-			apriltags_proxy = AprilTags_adapter.addWithUUID(apriltagsI_).ice_oneway()
 
-			subscribeDone = False
-			while not subscribeDone:
-				try:
-					apriltags_topic = topicManager.create("AprilTags")
-					subscribeDone = True
-				except:
-					try:
-						apriltags_topic = topicManager.retrieve("AprilTags")
-						subscribeDone = True
-					except e:
-						print e
-						print "Error. Topic does not exist"
-						sys.exit(-1)
-			qos = {}
-			apriltags_topic.subscribeAndGetPublisher(qos, apriltags_proxy)
-			AprilTags_adapter.activate()
-			print 'hecho'
 
 
 			self.communicator().waitForShutdown()
