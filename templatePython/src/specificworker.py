@@ -27,7 +27,7 @@ pool = IDSLPool(theIDSLs)
 [[[cog
 A()
 import datetime
-cog.out(str(datetime.date.today().year))
+cog.out(' '+str(datetime.date.today().year))
 Z()
 ]]]
 [[[end]]]
@@ -53,7 +53,7 @@ from PySide import *
 from genericworker import *
 
 class SpecificWorker(GenericWorker):
-	def __init__(self, proxy_map, parent):
+	def __init__(self, proxy_map):
 
 		print 'SpecificWorker.__init__ A'
 		super(SpecificWorker, self).__init__(proxy_map)

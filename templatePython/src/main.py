@@ -18,67 +18,68 @@ component = CDSLParsing.fromFile(theCDSL)
 
 
 REQUIRE_STR = """
-<TABHERE><TABHERE><TABHERE># Remote object connection for <NORMAL>
+<TABHERE><TABHERE># Remote object connection for <NORMAL>
+<TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE>proxyString = ic.getProperties().getProperty('<NORMAL>Proxy')
 <TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = self.ic.getProperties().getProperty('<NORMAL>Proxy')
-<TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.ic.stringToProxy(proxyString)
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>self.<LOWER>_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>mprx["<NORMAL>Proxy"] = self.<LOWER>_proxy
-<TABHERE><TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object (<NORMAL>)', proxyString
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>return
-<TABHERE><TABHERE><TABHERE>except Ice.Exception, e:
-<TABHERE><TABHERE><TABHERE><TABHERE>print e
-<TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot get <NORMAL>Proxy property.'
-<TABHERE><TABHERE><TABHERE><TABHERE>return
+<TABHERE><TABHERE><TABHERE><TABHERE>basePrx = ic.stringToProxy(proxyString)
+<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
+<TABHERE><TABHERE><TABHERE><TABHERE>mprx["<NORMAL>Proxy"] = <LOWER>_proxy
+<TABHERE><TABHERE><TABHERE>except Ice.Exception:
+<TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object (<NORMAL>)', proxyString
+<TABHERE><TABHERE><TABHERE><TABHERE>traceback.print_exc()
+<TABHERE><TABHERE><TABHERE><TABHERE>status = 1
+<TABHERE><TABHERE>except Ice.Exception, e:
+<TABHERE><TABHERE><TABHERE>print e
+<TABHERE><TABHERE><TABHERE>print 'Cannot get <NORMAL>Proxy property.'
+<TABHERE><TABHERE><TABHERE>status = 0
 """
 
 SUBSCRIBESTO_STR = """
-<TABHERE><TABHERE><TABHERE># Server adapter creation and publication
-<TABHERE><TABHERE><TABHERE>proxy = self.ic.getProperties().getProperty( "TopicManager.Proxy")
-<TABHERE><TABHERE><TABHERE>print proxy
-<TABHERE><TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(self.ic.stringToProxy(proxy))
-<TABHERE><TABHERE><TABHERE>print topicManager
+<TABHERE><TABHERE># Server adapter creation and publication
+<TABHERE><TABHERE>proxy = ic.getProperties().getProperty( "TopicManager.Proxy")
+<TABHERE><TABHERE>print proxy
+<TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(ic.stringToProxy(proxy))
+<TABHERE><TABHERE>print topicManager
 
-<TABHERE><TABHERE><TABHERE><NORMAL>_adapter = self.ic.createObjectAdapter("<NORMAL>Topic")
-<TABHERE><TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(handler, self.communicator)
-<TABHERE><TABHERE><TABHERE><LOWER>_proxy = <NORMAL>_adapter.addWithUUID(<LOWER>I_).ice_oneway()
+<TABHERE><TABHERE><NORMAL>_adapter = ic.createObjectAdapter("<NORMAL>Topic")
+<TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(handler, self.communicator)
+<TABHERE><TABHERE><LOWER>_proxy = <NORMAL>_adapter.addWithUUID(<LOWER>I_).ice_oneway()
 
-<TABHERE><TABHERE><TABHERE>subscribeDone = False
-<TABHERE><TABHERE><TABHERE>while not subscribeDone:
-<TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.create("<NORMAL>")
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
-<TABHERE><TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.retrieve("<NORMAL>")
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>except e:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print e
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print "Error. Topic does not exist"
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>sys.exit(-1)
-<TABHERE><TABHERE><TABHERE>qos = {}
-<TABHERE><TABHERE><TABHERE><LOWER>_topic.subscribeAndGetPublisher(qos, <LOWER>_proxy)
-<TABHERE><TABHERE><TABHERE><NORMAL>_adapter.activate()
+<TABHERE><TABHERE>subscribeDone = False
+<TABHERE><TABHERE>while not subscribeDone:
+<TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.create("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
+<TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.retrieve("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
+<TABHERE><TABHERE><TABHERE>except e:
+<TABHERE><TABHERE><TABHERE><TABHERE>print e
+<TABHERE><TABHERE><TABHERE><TABHERE>print "Error. Topic does not exist"
+<TABHERE><TABHERE><TABHERE><TABHERE>status = 0
+<TABHERE><TABHERE>qos = {}
+<TABHERE><TABHERE><LOWER>_topic.subscribeAndGetPublisher(qos, <LOWER>_proxy)
+<TABHERE><TABHERE><NORMAL>_adapter.activate()
 """
 
 PUBLISHES_STR = """
+<TABHERE><TABHERE>try:
+<TABHERE><TABHERE><TABHERE>topic = False
+<TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("<NORMAL>")
+<TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE>pass
+<TABHERE><TABHERE>while not topic:
 <TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>topic = False
-<TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("<NORMAL>")
-<TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE>pass
-<TABHERE><TABHERE><TABHERE>while not topic:
+<TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("AprilTagsTopic")
+<TABHERE><TABHERE><TABHERE>except IceStorm.NoSuchTopic:
 <TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("AprilTagsTopic")
-<TABHERE><TABHERE><TABHERE><TABHERE>except IceStorm.NoSuchTopic:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.create("<NORMAL>")
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Another client created the <NORMAL> topic... ok'
-<TABHERE><TABHERE><TABHERE>pub = topic.getPublisher().ice_oneway()
-<TABHERE><TABHERE><TABHERE>executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.create("<NORMAL>")
+<TABHERE><TABHERE><TABHERE><TABHERE>except:
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Another client created the <NORMAL> topic... ok'
+<TABHERE><TABHERE>pub = topic.getPublisher().ice_oneway()
+<TABHERE><TABHERE>executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
 
 
 <TABHERE>IceStorm::TopicPrx <LOWER>_topic;
@@ -107,9 +108,9 @@ PUBLISHES_STR = """
 IMPLEMENTS_STR = """
 <TABHERE><TABHERE><TABHERE>handler = <NORMAL>I()
 <TABHERE><TABHERE><TABHERE>handler.start()
-<TABHERE><TABHERE><TABHERE>adapter = self.ic.createObjectAdapter('<NORMAL>Comp')
-<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), self.ic.stringToIdentity('<LOWER>'))
-#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), self.ic.stringToIdentity('commonbehavior'))
+<TABHERE><TABHERE><TABHERE>adapter = ic.createObjectAdapter('<NORMAL>Comp')
+<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), ic.stringToIdentity('<LOWER>'))
+#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), ic.stringToIdentity('commonbehavior'))
 <TABHERE><TABHERE><TABHERE>adapter.activate()
 
 <TABHERE><TABHERE>// Server adapter creation and publication
@@ -124,7 +125,7 @@ IMPLEMENTS_STR = """
 [[[cog
 A()
 import datetime
-cog.out(str(datetime.date.today().year))
+cog.out(' '+str(datetime.date.today().year))
 Z()
 ]]]
 [[[end]]]
@@ -195,6 +196,8 @@ Z()
 
 import sys, traceback, Ice, IceStorm, subprocess, threading, time, Queue, os
 
+from PySide import *
+
 from specificworker import *
 
 ROBOCOMP = ''
@@ -212,7 +215,6 @@ Ice.loadSlice(preStr+"CommonBehavior.ice")
 import RoboCompCommonBehavior
 [[[cog
 for imp in component['imports']:
-	print (imp)
 	module = IDSLParsing.gimmeIDSL(imp.split('/')[-1])
 	incl = imp.split('/')[-1].split('.')[0]
 	cog.outl('Ice.loadSlice(preStr+"'+incl+'.ice")')
@@ -247,13 +249,19 @@ class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
 
 
 
-class MainClass(QtCore.QObject):
-	def __init__ (self, argv):
-		super(MainClass, self).__init__()
-		self.ic = Ice.initialize(argv)
-		status = 0
-		mprx = {}
-		try:
+if __name__ == '__main__':
+[[[cog
+	if component['gui']:
+		cog.outl('<TABHERE>app = QtGui.QApplication(sys.argv)')
+	else:
+		cog.outl('<TABHERE>app = QtCore.QCoreApplication(sys.argv)')
+]]]
+[[[end]]]
+
+	ic = Ice.initialize(sys.argv)
+	status = 0
+	mprx = {}
+	try:
 [[[cog
 for rq in component['requires']:
 	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
@@ -265,10 +273,10 @@ for rq in component['requires']:
 try:
 	if len(component['publishes']) > 0 or len(component['subscribes']) > 0:
 		cog.outl("""
-<TABHERE><TABHERE># Topic Manager
-<TABHERE><TABHERE>proxy = self.ic.getProperties().getProperty("TopicManager.Proxy")
-<TABHERE><TABHERE>obj = self.ic.stringToProxy(proxy)
-<TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
+<TABHERE># Topic Manager
+<TABHERE>proxy = ic.getProperties().getProperty("TopicManager.Proxy")
+<TABHERE>obj = ic.stringToProxy(proxy)
+<TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
 except:
 	pass
 ]]]
@@ -281,30 +289,18 @@ for pb in component['publishes']:
 	cog.outl(w)
 ]]]
 [[[end]]]
-			print 'Creating worker'
-			worker = SpecificWorker(mprx, self)
-			print 'Worker created'
 
-		except:
-			traceback.print_exc()
-			status = 1
+	except:
+		traceback.print_exc()
+		status = 1
 
+	worker = SpecificWorker(mprx)
 
-if __name__ == '__main__':
-[[[cog
-	if component['gui']:
-		cog.outl('<TABHERE>app = QtGui.QApplication(sys.argv)')
-	else:
-		cog.outl('<TABHERE>app = QtCore.QCoreApplication(sys.argv)')
-]]]
-[[[end]]]
-
-	MainClass(sys.argv)
-	print 'app.exec_'
 	app.exec_()
-	if self.ic:
+
+	if ic:
 		try:
-			self.ic.destroy()
+			ic.destroy()
 		except:
 			traceback.print_exc()
 			status = 1

@@ -26,7 +26,7 @@ pool = IDSLPool(theIDSLs)
 [[[cog
 A()
 import datetime
-cog.out(str(datetime.date.today().year))
+cog.out(' '+str(datetime.date.today().year))
 Z()
 ]]]
 [[[end]]]
@@ -54,7 +54,6 @@ class GenericWorker(QtCore.QObject):
 
 
 	def __init__(self, mprx):
-		print 'GenericWorker.__init__ A'
 		super(GenericWorker, self).__init__()
 [[[cog
 for rq in component['requires']:
@@ -71,10 +70,6 @@ for pb in component['publishes']:
 		mutex = QtCore.QMutex()
 		self.Period = 30
 		self.timer = QtCore.QTimer(self)
-
-
-
-		print 'GenericWorker.__init__ Z'
 
 
 	@QtCore.Slot()

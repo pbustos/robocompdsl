@@ -13,3 +13,5 @@ SET ( HEADERS
 
 INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
 
+ADD_DEFINITIONS( -std=c++14 )
+

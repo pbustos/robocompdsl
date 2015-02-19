@@ -52,7 +52,7 @@ class CDSLParsing:
 		# Language
 		language = Suppress(Word("language")) + (CaselessLiteral("cpp")|CaselessLiteral("python")) + semicolon
 		# GUI
-		gui = Optional(Group( Word("gui") + Word("Qt") + opp + identifier + clp + semicolon ))
+		gui = Group(Optional(Suppress(Word("gui")) + Word("Qt") + opp + identifier + clp + semicolon ))
 		
 		componentContents = communications.setResultsName('communications') & language.setResultsName('language') & gui.setResultsName('gui')
 		component = Suppress(Word("Component")) + identifier.setResultsName("name") + op + componentContents.setResultsName("properties") + cl + semicolon		
@@ -115,7 +115,14 @@ class CDSLParsing:
 		# GUI
 		component['gui'] = 'none'
 		try:
-			component['gui'] = tree['gui'][0]
+			uiT = tree['properties']['gui'][0]
+			uiI = tree['properties']['gui'][1]
+			if uiT.lower() == 'qt' and uiI in ['QWidget', 'QMainWindow', 'QDialog' ]:
+				component['gui'] = [ uiT, uiI ]
+				pass
+			else:
+				print 'Wrong UI specification', tree['properties']['gui']
+				sys.exit(1)
 		except:
 			pass
 
