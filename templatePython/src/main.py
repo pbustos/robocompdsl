@@ -20,13 +20,13 @@ component = CDSLParsing.fromFile(theCDSL)
 REQUIRE_STR = """
 <TABHERE><TABHERE><TABHERE># Remote object connection for <NORMAL>
 <TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = self.communicator().getProperties().getProperty('<NORMAL>Proxy')
+<TABHERE><TABHERE><TABHERE><TABHERE>proxyString = self.ic.getProperties().getProperty('<NORMAL>Proxy')
 <TABHERE><TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.communicator().stringToProxy(proxyString)
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>basePrx = self.ic.stringToProxy(proxyString)
 <TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>self.<LOWER>_proxy = RoboComp<NORMAL>.<NORMAL>Prx.checkedCast(basePrx)
 <TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>mprx["<NORMAL>Proxy"] = self.<LOWER>_proxy
 <TABHERE><TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object.'
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object (<NORMAL>)', proxyString
 <TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>return
 <TABHERE><TABHERE><TABHERE>except Ice.Exception, e:
 <TABHERE><TABHERE><TABHERE><TABHERE>print e
@@ -36,12 +36,12 @@ REQUIRE_STR = """
 
 SUBSCRIBESTO_STR = """
 <TABHERE><TABHERE><TABHERE># Server adapter creation and publication
-<TABHERE><TABHERE><TABHERE>proxy = self.communicator().getProperties().getProperty( "TopicManager.Proxy")
+<TABHERE><TABHERE><TABHERE>proxy = self.ic.getProperties().getProperty( "TopicManager.Proxy")
 <TABHERE><TABHERE><TABHERE>print proxy
-<TABHERE><TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
+<TABHERE><TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(self.ic.stringToProxy(proxy))
 <TABHERE><TABHERE><TABHERE>print topicManager
 
-<TABHERE><TABHERE><TABHERE><NORMAL>_adapter = self.communicator().createObjectAdapter("<NORMAL>Topic")
+<TABHERE><TABHERE><TABHERE><NORMAL>_adapter = self.ic.createObjectAdapter("<NORMAL>Topic")
 <TABHERE><TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(handler, self.communicator)
 <TABHERE><TABHERE><TABHERE><LOWER>_proxy = <NORMAL>_adapter.addWithUUID(<LOWER>I_).ice_oneway()
 
@@ -107,15 +107,15 @@ PUBLISHES_STR = """
 IMPLEMENTS_STR = """
 <TABHERE><TABHERE><TABHERE>handler = <NORMAL>I()
 <TABHERE><TABHERE><TABHERE>handler.start()
-<TABHERE><TABHERE><TABHERE>adapter = self.communicator().createObjectAdapter('<NORMAL>Comp')
-<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), self.communicator().stringToIdentity('<LOWER>'))
-#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), self.communicator().stringToIdentity('commonbehavior'))
+<TABHERE><TABHERE><TABHERE>adapter = self.ic.createObjectAdapter('<NORMAL>Comp')
+<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), self.ic.stringToIdentity('<LOWER>'))
+#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), self.ic.stringToIdentity('commonbehavior'))
 <TABHERE><TABHERE><TABHERE>adapter.activate()
 
 <TABHERE><TABHERE>// Server adapter creation and publication
-<TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = communicator()->createObjectAdapter("<NORMAL>Comp");
+<TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = ic->createObjectAdapter("<NORMAL>Comp");
 <TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
-<TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, communicator()->stringToIdentity("<LOWER>"));
+<TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, ic.stringToIdentity("<LOWER>"));
 """
 ]]]
 [[[end]]]
@@ -247,13 +247,13 @@ class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
 
 
 
-class MainClass (Ice.Application):
-	def run (self, argv):
+class MainClass(QtCore.QObject):
+	def __init__ (self, argv):
+		super(MainClass, self).__init__()
+		self.ic = Ice.initialize(argv)
 		status = 0
 		mprx = {}
 		try:
-			self.shutdownOnInterrupt()
-
 [[[cog
 for rq in component['requires']:
 	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
@@ -266,8 +266,8 @@ try:
 	if len(component['publishes']) > 0 or len(component['subscribes']) > 0:
 		cog.outl("""
 <TABHERE><TABHERE># Topic Manager
-<TABHERE><TABHERE>proxy = self.communicator().getProperties().getProperty("TopicManager.Proxy")
-<TABHERE><TABHERE>obj = self.communicator().stringToProxy(proxy)
+<TABHERE><TABHERE>proxy = self.ic.getProperties().getProperty("TopicManager.Proxy")
+<TABHERE><TABHERE>obj = self.ic.stringToProxy(proxy)
 <TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
 except:
 	pass
@@ -281,21 +281,30 @@ for pb in component['publishes']:
 	cog.outl(w)
 ]]]
 [[[end]]]
+			print 'Creating worker'
+			worker = SpecificWorker(mprx, self)
+			print 'Worker created'
 
-
-			worker = SpecificWorker(mprx)
-			#worker.kill.connect(quit)
-
-			self.communicator().waitForShutdown()
 		except:
 			traceback.print_exc()
 			status = 1
 
-		if self.communicator():
-			try:
-				self.communicator().destroy()
-			except:
-				traceback.print_exc()
-				status = 1
 
-MainClass( ).main(sys.argv)
+if __name__ == '__main__':
+[[[cog
+	if component['gui']:
+		cog.outl('<TABHERE>app = QtGui.QApplication(sys.argv)')
+	else:
+		cog.outl('<TABHERE>app = QtCore.QCoreApplication(sys.argv)')
+]]]
+[[[end]]]
+
+	MainClass(sys.argv)
+	print 'app.exec_'
+	app.exec_()
+	if self.ic:
+		try:
+			self.ic.destroy()
+		except:
+			traceback.print_exc()
+			status = 1

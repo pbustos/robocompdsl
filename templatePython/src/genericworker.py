@@ -52,31 +52,29 @@ from PySide import *
 class GenericWorker(QtCore.QObject):
 	kill = QtCore.Signal()
 
-	@QtCore.Slot()
-	def compute(self):
-		print ('overload this method, please')
 
 	def __init__(self, mprx):
-		self.mprx = mprx
+		print 'GenericWorker.__init__ A'
+		super(GenericWorker, self).__init__()
 [[[cog
 for rq in component['requires']:
-	cog.outl("<TABHERE><TABHERE>"+rq.lower()+"_proxy = mprx[\""+rq+"Proxy\"]")
+	cog.outl("<TABHERE><TABHERE>self."+rq.lower()+"_proxy = mprx[\""+rq+"Proxy\"]")
 ]]]
 [[[end]]]
 
 [[[cog
 for pb in component['publishes']:
-	cog.outl("<TABHERE><TABHERE>"+pb.lower()+" = mprx[\""+pb+"Pub\"]")
+	cog.outl("<TABHERE><TABHERE>self."+pb.lower()+" = mprx[\""+pb+"Pub\"]")
 ]]]
 [[[end]]]
 
 		mutex = QtCore.QMutex()
-		Period = 30
-		self.timer = QtCore.QTimer()
-		self.timer.timeout.connect(self.compute)
-		self.timer.start(Period)
+		self.Period = 30
+		self.timer = QtCore.QTimer(self)
 
 
+
+		print 'GenericWorker.__init__ Z'
 
 
 	@QtCore.Slot()
