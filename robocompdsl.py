@@ -15,6 +15,8 @@ if len(sys.argv) < 3:
 inputFile  = sys.argv[1]
 outputPath = sys.argv[2]
 
+sys.path.append('/opt/robocomp/python')
+
 
 from parseCDSL import *
 component = CDSLParsing.fromFile(inputFile)

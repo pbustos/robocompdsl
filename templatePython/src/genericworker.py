@@ -49,13 +49,21 @@ Z()
 
 from PySide import *
 
+[[[cog
+A()
+cog.out('from ')
+Z()
+]]]
+[[[end]]]
+
+
 class GenericWorker(
 [[[cog
 A()
 if component['gui'] == 'none':
 	cog.out("QtCore.QObject")
 else:
-	cog.out(component['gui'][1])
+	cog.out('Ui_guiDlg')
 Z()
 ]]]
 [[[end]]]
@@ -80,8 +88,8 @@ for pb in component['publishes']:
 [[[cog
 A()
 if component['gui'] != 'none':
-		self.ui = Ui_guiDlg()
-		self.ui.setupUi(self)
+	cog.outl("<TABHERE><TABHERE>self.ui = Ui_guiDlg()")
+	cog.outl("<TABHERE><TABHERE>self.ui.setupUi(self)")
 Z()
 ]]]
 [[[end]]]
