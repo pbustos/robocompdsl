@@ -28,9 +28,7 @@ pool = IDSLPool(theIDSLs)
  <widget class="
 [[[cog
 A()
-cog.out(component['gui'])
-print(component['gui'])
-print(component['gui'])
+cog.out(component['gui'][1])
 Z()
 ]]]
 [[[end]]]

@@ -128,10 +128,12 @@ elif component['language'].lower() == 'python':
 	# Generate regular files
 	#
 	files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.py', 'src/genericworker.py', 'src/specificworker.py', 'src/mainUI.ui' ]
-	specificFiles = [  ]
-	#specificFiles = [ 'src/specificworker.py' ]
+	specificFiles = [ 'src/specificworker.py' ]
 	for f in files:
-		ofile = outputPath + '/' + f
+		if f == 'src/main.py':
+			ofile = outputPath + '/src/' + component['name'] + '.py'
+		else:
+			ofile = outputPath + '/' + f
 		if f in specificFiles and os.path.exists(ofile):
 			print 'Skipping overwriting specific file:', ofile
 			continue
@@ -143,7 +145,8 @@ elif component['language'].lower() == 'python':
 		if ret != 0:
 			print 'ERROR'
 			sys.exyt(-1)
-		replaceTagsInFile(outputPath + '/' + f)
+		replaceTagsInFile(ofile)
+		if f == 'src/main.py': os.chmod(ofile, os.stat(ofile).st_mode | 0111 )
 	#
 	# Generate interface-dependent files
 	#

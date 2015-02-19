@@ -54,15 +54,10 @@ from genericworker import *
 
 class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
-
-		print 'SpecificWorker.__init__ A'
 		super(SpecificWorker, self).__init__(proxy_map)
-
-		print 'SpecificWorker.__init__ N'
 		self.timer.timeout.connect(self.compute)
+		self.Period = 2000
 		self.timer.start(self.Period)
-
-		print 'SpecificWorker.__init__ Z'
 
 	def setParams(self, params):
 		#// 	try

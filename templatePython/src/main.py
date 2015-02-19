@@ -32,7 +32,7 @@ REQUIRE_STR = """
 <TABHERE><TABHERE>except Ice.Exception, e:
 <TABHERE><TABHERE><TABHERE>print e
 <TABHERE><TABHERE><TABHERE>print 'Cannot get <NORMAL>Proxy property.'
-<TABHERE><TABHERE><TABHERE>status = 0
+<TABHERE><TABHERE><TABHERE>status = 1
 """
 
 SUBSCRIBESTO_STR = """
