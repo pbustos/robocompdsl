@@ -49,7 +49,17 @@ Z()
 
 from PySide import *
 
-class GenericWorker(QtCore.QObject):
+class GenericWorker(
+[[[cog
+A()
+if component['gui'] == 'none':
+	cog.out("QtCore.QObject")
+else:
+	cog.out(component['gui'][1])
+Z()
+]]]
+[[[end]]]
+):
 	kill = QtCore.Signal()
 
 
@@ -67,6 +77,16 @@ for pb in component['publishes']:
 ]]]
 [[[end]]]
 
+[[[cog
+A()
+if component['gui'] != 'none':
+		self.ui = Ui_guiDlg()
+		self.ui.setupUi(self)
+Z()
+]]]
+[[[end]]]
+		
+		
 		mutex = QtCore.QMutex()
 		self.Period = 30
 		self.timer = QtCore.QTimer(self)
