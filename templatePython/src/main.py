@@ -16,7 +16,6 @@ def TAB():
 from parseCDSL import *
 component = CDSLParsing.fromFile(theCDSL)
 
-import specificworker
 
 REQUIRE_STR = """
 <TABHERE><TABHERE><TABHERE># Remote object connection for <NORMAL>
@@ -196,6 +195,8 @@ Z()
 
 import sys, traceback, Ice, IceStorm, subprocess, threading, time, Queue, os
 
+from specificworker import *
+
 ROBOCOMP = ''
 try:
 	ROBOCOMP = os.environ['ROBOCOMP']
@@ -282,8 +283,8 @@ for pb in component['publishes']:
 [[[end]]]
 
 
-			worker = SpecificWorker(mprx);
-			connect(worker, SIGNAL(kill()), a, SLOT(quit()));
+			worker = SpecificWorker(mprx)
+			#worker.kill.connect(quit)
 
 			self.communicator().waitForShutdown()
 		except:

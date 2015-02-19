@@ -127,7 +127,7 @@ elif component['language'].lower() == 'python':
 	#
 	# Generate regular files
 	#
-	files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.py', 'src/commonbehaviorI.py', 'src/genericmonitor.py', 'src/specificmonitor.py', 'src/genericworker.py', 'src/specificworker.py', 'src/specificmonitor.py' ]
+	files = [ 'CMakeLists.txt', 'DoxyFile', 'README-STORM.txt', 'etc/config', 'src/main.py', 'src/commonbehaviorI.py', 'src/genericworker.py', 'src/specificworker.py' ]
 	specificFiles = [ 'src/specificworker.py' ]
 	for f in files:
 		ofile = outputPath + '/' + f

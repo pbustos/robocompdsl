@@ -49,52 +49,37 @@ Z()
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-/**
-* \brief Default constructor
-*/
-SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
-{
-}
+from PySide import *
+from genericworker import *
 
-/**
-* \brief Default destructor
-*/
-SpecificWorker::~SpecificWorker()
-{
+class SpecificWorker(GenericWorker):
+	def __init__(self, proxy_map):
+		GenericWorker.__init__(self, proxy_map)
 
-}
+	def setParams(self, params):
+		#// 	try
+		#// 	{
+		#// 		RoboCompCommonBehavior::Parameter par = params.at("InnerModelPath");
+		#// 		innermodel_path=par.value;
+		#// 		innermodel = new InnerModel(innermodel_path);
+		#// 	}
+		#// 	catch(std::exception e) { qFatal("Error reading config params"); }
+		return True
 
-bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
-{
-//       THE FOLLOWING IS JUST AN EXAMPLE
-//
-// 	try
-// 	{
-// 		RoboCompCommonBehavior::Parameter par = params.at("InnerModelPath");
-// 		innermodel_path=par.value;
-// 		innermodel = new InnerModel(innermodel_path);
-// 	}
-// 	catch(std::exception e) { qFatal("Error reading config params"); }
-
-
-
-	return true;
-}
-
-void SpecificWorker::compute()
-{
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
-}
-
+	@QtCore.Slot()
+	def compute(self):
+		print 'SpecificWorker.compute...'
+		#// 	try
+		#// 	{
+		#// 		camera_proxy->getYImage(0,img, cState, bState);
+		#// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
+		#// 		searchTags(image_gray);
+		#// 	}
+		#// 	catch(const Ice::Exception &e)
+		#// 	{
+		#// 		std::cout << "Error reading from Camera" << e << std::endl;
+		#// 	}
+		return True
 
 [[[cog
 if 'implements' in component:
@@ -117,7 +102,7 @@ if 'implements' in component:
 						else:
 							ampersand = '&'
 						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
-					cog.outl(method['return'] + ' SpecificWorker::' + method['name'] + '(' + paramStrA + ")\n{\n}\n")
+					cog.outl('<TABHERE>def ' + method['name'] + '(self, ' + paramStrA + "):\n<TABHERE>pass\n")
 ]]]
 [[[end]]]
 
@@ -142,8 +127,7 @@ if 'subscribesTo' in component:
 						else:
 							ampersand = '&'
 						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
-
-						cog.outl(method['return'] + ' SpecificWorker::' + method['name'] + '(' + paramStrA + ")\n{\n}\n")
+					cog.outl('<TABHERE>def ' + method['name'] + '(self, ' + paramStrA + "):\n<TABHERE>pass\n")
 ]]]
 [[[end]]]
 
