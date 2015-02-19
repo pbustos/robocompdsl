@@ -51,7 +51,8 @@ from PySide import *
 
 [[[cog
 A()
-cog.out('from ')
+if component['gui'] != 'none':
+	cog.out('from ui_mainUI import *')
 Z()
 ]]]
 [[[end]]]
@@ -60,10 +61,10 @@ Z()
 class GenericWorker(
 [[[cog
 A()
-if component['gui'] == 'none':
-	cog.out("QtCore.QObject")
+if component['gui'] != 'none':
+	cog.out('QtGui.'+component['gui'][1])
 else:
-	cog.out('Ui_guiDlg')
+	cog.out('QtCore.QObject')
 Z()
 ]]]
 [[[end]]]
@@ -73,6 +74,8 @@ Z()
 
 	def __init__(self, mprx):
 		super(GenericWorker, self).__init__()
+
+
 [[[cog
 for rq in component['requires']:
 	cog.outl("<TABHERE><TABHERE>self."+rq.lower()+"_proxy = mprx[\""+rq+"Proxy\"]")
@@ -90,6 +93,7 @@ A()
 if component['gui'] != 'none':
 	cog.outl("<TABHERE><TABHERE>self.ui = Ui_guiDlg()")
 	cog.outl("<TABHERE><TABHERE>self.ui.setupUi(self)")
+	cog.outl("<TABHERE><TABHERE>self.show()")
 Z()
 ]]]
 [[[end]]]
