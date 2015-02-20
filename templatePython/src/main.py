@@ -27,7 +27,7 @@ REQUIRE_STR = """
 <TABHERE><TABHERE><TABHERE><TABHERE>mprx["<NORMAL>Proxy"] = <LOWER>_proxy
 <TABHERE><TABHERE><TABHERE>except Ice.Exception:
 <TABHERE><TABHERE><TABHERE><TABHERE>print 'Cannot connect to the remote object (<NORMAL>)', proxyString
-<TABHERE><TABHERE><TABHERE><TABHERE>traceback.print_exc()
+<TABHERE><TABHERE><TABHERE><TABHERE>#traceback.print_exc()
 <TABHERE><TABHERE><TABHERE><TABHERE>status = 1
 <TABHERE><TABHERE>except Ice.Exception, e:
 <TABHERE><TABHERE><TABHERE>print e
@@ -106,17 +106,9 @@ PUBLISHES_STR = """
 """
 
 IMPLEMENTS_STR = """
-<TABHERE><TABHERE><TABHERE>handler = <NORMAL>I()
-<TABHERE><TABHERE><TABHERE>handler.start()
-<TABHERE><TABHERE><TABHERE>adapter = ic.createObjectAdapter('<NORMAL>Comp')
-<TABHERE><TABHERE><TABHERE>adapter.add(<NORMAL>I(handler), ic.stringToIdentity('<LOWER>'))
-#<TABHERE><TABHERE><TABHERE>adapter.add(CommonBehaviorI(handler, self.communicator), ic.stringToIdentity('commonbehavior'))
-<TABHERE><TABHERE><TABHERE>adapter.activate()
-
-<TABHERE><TABHERE>// Server adapter creation and publication
-<TABHERE><TABHERE>Ice::ObjectAdapterPtr adapter<NORMAL> = ic->createObjectAdapter("<NORMAL>Comp");
-<TABHERE><TABHERE><NORMAL>I *<LOWER> = new <NORMAL>I(worker);
-<TABHERE><TABHERE>adapter<NORMAL>->add(<LOWER>, ic.stringToIdentity("<LOWER>"));
+<TABHERE><TABHERE>adapter = ic.createObjectAdapter('<NORMAL>Comp')
+<TABHERE><TABHERE>adapter.add(<NORMAL>I(worker), ic.stringToIdentity('<LOWER>'))
+<TABHERE><TABHERE>adapter.activate()
 """
 ]]]
 [[[end]]]
@@ -223,7 +215,7 @@ for imp in component['imports']:
 [[[end]]]
 
 
-class CommonBehaviorI (RoboCompCommonBehavior.CommonBehavior):
+class CommonBehaviorI(RoboCompCommonBehavior.CommonBehavior):
 	def __init__(self, _handler, _communicator):
 		self.handler = _handler
 		self.communicator = _communicator
@@ -257,7 +249,6 @@ if __name__ == '__main__':
 		cog.outl('<TABHERE>app = QtCore.QCoreApplication(sys.argv)')
 ]]]
 [[[end]]]
-
 	ic = Ice.initialize(sys.argv)
 	status = 0
 	mprx = {}
@@ -266,10 +257,7 @@ if __name__ == '__main__':
 for rq in component['requires']:
 	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
 	cog.outl(w)
-]]]
-[[[end]]]
 
-[[[cog
 try:
 	if len(component['publishes']) > 0 or len(component['subscribes']) > 0:
 		cog.outl("""
@@ -279,11 +267,7 @@ try:
 <TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
 except:
 	pass
-]]]
-[[[end]]]
 
-
-[[[cog
 for pb in component['publishes']:
 	w = PUBLISHES_STR.replace("<NORMAL>", pb).replace("<LOWER>", pb.lower())
 	cog.outl(w)
@@ -294,9 +278,19 @@ for pb in component['publishes']:
 		traceback.print_exc()
 		status = 1
 
-	worker = SpecificWorker(mprx)
+	if status == 0:
+		worker = SpecificWorker(mprx)
 
-	app.exec_()
+[[[cog
+for im in component['implements']:
+	w = IMPLEMENTS_STR.replace("<NORMAL>", im).replace("<LOWER>", im.lower())
+	cog.outl(w)
+]]]
+[[[end]]]
+
+#<TABHERE><TABHERE>adapter.add(CommonBehaviorI(<LOWER>I, self.communicator), ic.stringToIdentity('commonbehavior'))
+
+		app.exec_()
 
 	if ic:
 		try:

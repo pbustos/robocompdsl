@@ -99,7 +99,7 @@ Z()
 [[[end]]]
 		
 		
-		mutex = QtCore.QMutex()
+		self.mutex = QtCore.QMutex()
 		self.Period = 30
 		self.timer = QtCore.QTimer(self)
 

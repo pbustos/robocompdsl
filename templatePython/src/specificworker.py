@@ -52,6 +52,12 @@ Z()
 from PySide import *
 from genericworker import *
 
+[[[cog
+	for im in component['implements']+component['subscribesTo']:
+		cog.outl('from ' + im.lower() + 'I import *')
+]]]
+[[[end]]]
+
 class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
 		super(SpecificWorker, self).__init__(proxy_map)
@@ -96,16 +102,8 @@ if 'implements' in component:
 					for p in method['params']:
 						if paramStrA == '': delim = ''
 						else: delim = ', '
-						if p['decorator'] == 'out':
-							const = ''
-						else:
-							const = 'const '
-						if  p['type'] in [ 'int' ]:
-							ampersand = ''
-						else:
-							ampersand = '&'
-						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
-					cog.outl('<TABHERE>def ' + method['name'] + '(self, ' + paramStrA + "):\n<TABHERE>pass\n")
+						paramStrA += delim +  p['name']
+					cog.outl('<TABHERE>def ' + method['name'] + '(self, ' + paramStrA + "):\n<TABHERE><TABHERE>pass\n")
 ]]]
 [[[end]]]
 

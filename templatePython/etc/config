@@ -1,5 +1,4 @@
-SpeechComp.Endpoints=tcp -p 10021
-AprilTagsTopic.Endpoints=tcp -p 12021
+LaserComp.Endpoints=tcp -p 10021
 
 TopicManager.Proxy=IceStorm/TopicManager:default -p 9999
 
