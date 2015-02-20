@@ -99,14 +99,16 @@ if 'implements' in component:
 			if interface['name'] == imp:
 				for mname in interface['methods']:
 					method = interface['methods'][mname]
+					paramStrA = ''
 					for p in method['params']:
 						paramStrA += ', ' +  p['name']
 					cog.outl('<TABHERE>def ' + method['name'] + '(self' + paramStrA + "):")
-					cog.outl("<TABHERE><TABHERE>ret = "+method['return']+'()')
+					if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>ret = "+method['return']+'()')
 					cog.outl("<TABHERE><TABHERE>#")
 					cog.outl("<TABHERE><TABHERE># YOUR CODE HERE")
 					cog.outl("<TABHERE><TABHERE>#")
-					cog.outl("<TABHERE><TABHERE>return ret\n")
+					if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>return ret\n")
+					else: cog.outl("<TABHERE><TABHERE>pass\n")
 ]]]
 [[[end]]]
 
