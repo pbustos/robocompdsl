@@ -22,7 +22,8 @@ pool = IDSLPool(theIDSLs)
 
 ]]]
 [[[end]]]
-#    Copyright (C)
+#
+# Copyright (C)
 [[[cog
 A()
 import datetime

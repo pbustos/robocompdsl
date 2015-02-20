@@ -106,14 +106,15 @@ PUBLISHES_STR = """
 """
 
 IMPLEMENTS_STR = """
-<TABHERE><TABHERE>adapter = ic.createObjectAdapter('<NORMAL>Comp')
+<TABHERE><TABHERE>adapter = ic.createObjectAdapter('<NORMAL>')
 <TABHERE><TABHERE>adapter.add(<NORMAL>I(worker), ic.stringToIdentity('<LOWER>'))
 <TABHERE><TABHERE>adapter.activate()
 """
 ]]]
 [[[end]]]
 
-#    Copyright (C)
+#
+# Copyright (C)
 [[[cog
 A()
 import datetime
@@ -252,8 +253,9 @@ if __name__ == '__main__':
 	ic = Ice.initialize(sys.argv)
 	status = 0
 	mprx = {}
-	try:
 [[[cog
+if len(component['requires']) > 0 or len(component['publishes']) > 0:
+	cog.outl('try:')
 for rq in component['requires']:
 	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
 	cog.outl(w)
@@ -271,12 +273,15 @@ except:
 for pb in component['publishes']:
 	w = PUBLISHES_STR.replace("<NORMAL>", pb).replace("<LOWER>", pb.lower())
 	cog.outl(w)
+
+
+if len(component['requires']) > 0 or len(component['publishes']) > 0:
+	cog.outl("""except:
+		traceback.print_exc()
+		status = 1""")
 ]]]
 [[[end]]]
 
-	except:
-		traceback.print_exc()
-		status = 1
 
 	if status == 0:
 		worker = SpecificWorker(mprx)

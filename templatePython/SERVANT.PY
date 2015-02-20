@@ -27,7 +27,8 @@ if module == None:
 
 ]]]
 [[[end]]]
-#    Copyright (C)
+#
+# Copyright (C)
 [[[cog
 A()
 import datetime
@@ -74,9 +75,6 @@ cog.outl('\nclass ' + theInterface+ 'I('+theInterface+'):')
 [[[end]]]
 	def __init__(self, worker):
 		self.worker = worker
-		mutex = worker.mutex
-
-
 
 [[[cog
 
@@ -97,7 +95,7 @@ cog.outl('\nclass ' + theInterface+ 'I('+theInterface+'):')
 					paramStrB += delim + p['name']
 
 				cog.outl('<TABHERE>def ' + name + '(' + paramStrA + 'c):')
-				cog.out('<TABHERE><TABHERE>worker.'+name+'(')
+				cog.out('<TABHERE><TABHERE>return worker.'+name+'(')
 				cog.out(paramStrB)
 				cog.out(')\n')
 
