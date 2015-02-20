@@ -20,6 +20,10 @@ if component == None:
 from parseIDSL import *
 pool = IDSLPool(theIDSLs)
 
+def replaceTypeCPP2Python(t):
+	t = t.replace('::','.')
+	t = t.replace('string', 'str')
+	return t
 
 ]]]
 [[[end]]]
@@ -99,16 +103,40 @@ if 'implements' in component:
 			if interface['name'] == imp:
 				for mname in interface['methods']:
 					method = interface['methods'][mname]
+					outValues = []
+					if method['return'] != 'void':
+						outValues.append([method['return'], 'ret'])
 					paramStrA = ''
 					for p in method['params']:
-						paramStrA += ', ' +  p['name']
+						if p['decorator'] == 'out':
+							outValues.append([p['type'], p['name']])
+						else:
+							paramStrA += ', ' +  p['name']
 					cog.outl('<TABHERE>def ' + method['name'] + '(self' + paramStrA + "):")
 					if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>ret = "+method['return']+'()')
 					cog.outl("<TABHERE><TABHERE>#")
 					cog.outl("<TABHERE><TABHERE># YOUR CODE HERE")
 					cog.outl("<TABHERE><TABHERE>#")
-					if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>return ret\n")
-					else: cog.outl("<TABHERE><TABHERE>pass\n")
+					if len(outValues) == 0:
+						cog.outl("<TABHERE><TABHERE>pass\n")
+					elif len(outValues) == 1:
+						if method['return'] != 'void':
+							cog.outl("<TABHERE><TABHERE>return ret\n")
+						else:
+							cog.outl("<TABHERE><TABHERE>"+outValues[0][1]+" = "+replaceTypeCPP2Python(outValues[0][0])+"()")
+							cog.outl("<TABHERE><TABHERE>return "+outValues[0][1]+"\n")
+					else:
+						for v in outValues:
+							if v[1] != 'ret':
+								cog.outl("<TABHERE><TABHERE>"+v[1]+" = "+replaceTypeCPP2Python(v[0])+"()")
+						first = True
+						cog.out("<TABHERE><TABHERE>return [")
+						for v in outValues:
+							if not first: cog.out(', ')
+							cog.out(v[1])
+							if first:
+								first = False
+						cog.out("]\n")
 ]]]
 [[[end]]]
 

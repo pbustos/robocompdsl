@@ -87,15 +87,17 @@ cog.outl('\nclass ' + theInterface+ 'I('+theInterface+'):')
 				
 				paramStrA = ''
 				for p in method['params']:
-					paramStrA += p['name'] + ', '
+					if p['decorator'] != 'out':
+						paramStrA += p['name'] + ', '
 				paramStrB = ''
 				for p in method['params']:
-					if paramStrB == '': delim = ''
-					else: delim = ', '
-					paramStrB += delim + p['name']
+					if p['decorator'] != 'out':
+						if paramStrB == '': delim = ''
+						else: delim = ', '
+						paramStrB += delim + p['name']
 
-				cog.outl('<TABHERE>def ' + name + '(' + paramStrA + 'c):')
-				cog.out('<TABHERE><TABHERE>return worker.'+name+'(')
+				cog.outl('<TABHERE>def ' + name + '(self, ' + paramStrA + 'c):')
+				cog.out('<TABHERE><TABHERE>return self.worker.'+name+'(')
 				cog.out(paramStrB)
 				cog.out(')\n')
 
