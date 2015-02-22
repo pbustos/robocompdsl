@@ -272,11 +272,17 @@ Z()
 [[[end]]]
 ::run(int argc, char* argv[])
 {
-#ifdef USE_QTGUI
-	QApplication a(argc, argv);  // GUI application
-#else
-	QCoreApplication a(argc, argv);  // NON-GUI application
-#endif
+[[[cog
+	if component['gui']:
+		cog.outl("#ifdef USE_QTGUI")
+		cog.outl("QApplication a(argc, argv);  // GUI application")
+		cog.outl("#else")
+		cog.outl("<TABHERE>QCoreApplication a(argc, argv);  // NON-GUI application")
+		cog.outl("#endif")
+	else:
+		cog.outl("<TABHERE>QCoreApplication a(argc, argv);  // NON-GUI application")
+]]]
+[[[end]]]
 	int status=EXIT_SUCCESS;
 
 [[[cog
