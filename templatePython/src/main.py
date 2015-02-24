@@ -36,22 +36,12 @@ REQUIRE_STR = """
 """
 
 SUBSCRIBESTO_STR = """
-<TABHERE><TABHERE># Server adapter creation and publication
-<TABHERE><TABHERE>proxy = ic.getProperties().getProperty( "TopicManager.Proxy")
-<TABHERE><TABHERE>print proxy
-<TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(ic.stringToProxy(proxy))
-<TABHERE><TABHERE>print topicManager
-
 <TABHERE><TABHERE><NORMAL>_adapter = ic.createObjectAdapter("<NORMAL>Topic")
-<TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(handler, self.communicator)
+<TABHERE><TABHERE><LOWER>I_ = <NORMAL>I(worker)
 <TABHERE><TABHERE><LOWER>_proxy = <NORMAL>_adapter.addWithUUID(<LOWER>I_).ice_oneway()
 
 <TABHERE><TABHERE>subscribeDone = False
 <TABHERE><TABHERE>while not subscribeDone:
-<TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.create("<NORMAL>")
-<TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
-<TABHERE><TABHERE>except:
 <TABHERE><TABHERE><TABHERE>try:
 <TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager.retrieve("<NORMAL>")
 <TABHERE><TABHERE><TABHERE><TABHERE>subscribeDone = True
@@ -65,44 +55,23 @@ SUBSCRIBESTO_STR = """
 """
 
 PUBLISHES_STR = """
+<TABHERE><TABHERE># Create a proxy to publish a <NORMAL> topic
+<TABHERE><TABHERE>topic = False
 <TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE>topic = False
 <TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("<NORMAL>")
 <TABHERE><TABHERE>except:
 <TABHERE><TABHERE><TABHERE>pass
 <TABHERE><TABHERE>while not topic:
 <TABHERE><TABHERE><TABHERE>try:
-<TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("AprilTagsTopic")
+<TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.retrieve("<NORMAL>")
 <TABHERE><TABHERE><TABHERE>except IceStorm.NoSuchTopic:
 <TABHERE><TABHERE><TABHERE><TABHERE>try:
 <TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>topic = topicManager.create("<NORMAL>")
 <TABHERE><TABHERE><TABHERE><TABHERE>except:
-<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Another client created the <NORMAL> topic... ok'
+<TABHERE><TABHERE><TABHERE><TABHERE><TABHERE>print 'Another client created the <NORMAL> topic? ...'
 <TABHERE><TABHERE>pub = topic.getPublisher().ice_oneway()
-<TABHERE><TABHERE>executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
-
-
-<TABHERE>IceStorm::TopicPrx <LOWER>_topic;
-<TABHERE>while (!<LOWER>_topic)
-<TABHERE>{
-<TABHERE><TABHERE>try
-<TABHERE><TABHERE>{
-<TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->retrieve("<NORMAL>");
-<TABHERE><TABHERE>}
-<TABHERE><TABHERE>catch (const IceStorm::NoSuchTopic&)
-<TABHERE><TABHERE>{
-<TABHERE><TABHERE><TABHERE>try
-<TABHERE><TABHERE><TABHERE>{
-<TABHERE><TABHERE><TABHERE><TABHERE><LOWER>_topic = topicManager->create("<NORMAL>");
-<TABHERE><TABHERE><TABHERE>}
-<TABHERE><TABHERE><TABHERE>catch (const IceStorm::TopicExists&){
-<TABHERE><TABHERE><TABHERE><TABHERE>// Another client created the topic.
-<TABHERE><TABHERE><TABHERE>}
-<TABHERE><TABHERE>}
-<TABHERE>}
-<TABHERE>Ice::ObjectPrx <LOWER>_pub = <LOWER>_topic->getPublisher()->ice_oneway();
-<TABHERE><NORMAL>Prx <LOWER> = <NORMAL>Prx::uncheckedCast(<LOWER>_pub);
-<TABHERE>mprx["<NORMAL>Pub"] = (::IceProxy::Ice::Object*)(&<LOWER>);
+<TABHERE><TABHERE><LOWER>Topic = <NORMAL>Prx.uncheckedCast(pub)
+<TABHERE><TABHERE>mprx["<NORMAL>Pub"] = <LOWER>Topic
 """
 
 IMPLEMENTS_STR = """
@@ -254,19 +223,19 @@ if __name__ == '__main__':
 	status = 0
 	mprx = {}
 [[[cog
-if len(component['requires']) > 0 or len(component['publishes']) > 0:
-	cog.outl('try:')
+if len(component['requires']) > 0 or len(component['publishes']) > 0 or len(component['subscribesTo']) > 0:
+	cog.outl('<TABHERE>try:')
 for rq in component['requires']:
 	w = REQUIRE_STR.replace("<NORMAL>", rq).replace("<LOWER>", rq.lower())
 	cog.outl(w)
 
 try:
-	if len(component['publishes']) > 0 or len(component['subscribes']) > 0:
+	if len(component['publishes']) > 0 or len(component['subscribesTo']) > 0:
 		cog.outl("""
-<TABHERE># Topic Manager
-<TABHERE>proxy = ic.getProperties().getProperty("TopicManager.Proxy")
-<TABHERE>obj = ic.stringToProxy(proxy)
-<TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
+<TABHERE><TABHERE># Topic Manager
+<TABHERE><TABHERE>proxy = ic.getProperties().getProperty("TopicManager.Proxy")
+<TABHERE><TABHERE>obj = ic.stringToProxy(proxy)
+<TABHERE><TABHERE>topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)""")
 except:
 	pass
 
@@ -274,11 +243,10 @@ for pb in component['publishes']:
 	w = PUBLISHES_STR.replace("<NORMAL>", pb).replace("<LOWER>", pb.lower())
 	cog.outl(w)
 
-
-if len(component['requires']) > 0 or len(component['publishes']) > 0:
-	cog.outl("""except:
-		traceback.print_exc()
-		status = 1""")
+if len(component['requires']) > 0 or len(component['publishes']) > 0 or len(component['subscribesTo']) > 0:
+	cog.outl("""<TABHERE>except:
+		<TABHERE>traceback.print_exc()
+		<TABHERE>status = 1""")
 ]]]
 [[[end]]]
 
@@ -290,10 +258,15 @@ if len(component['requires']) > 0 or len(component['publishes']) > 0:
 for im in component['implements']:
 	w = IMPLEMENTS_STR.replace("<NORMAL>", im).replace("<LOWER>", im.lower())
 	cog.outl(w)
+
+
+for st in component['subscribesTo']:
+	w = SUBSCRIBESTO_STR.replace("<NORMAL>", st).replace("<LOWER>", st.lower())
+	cog.outl(w)
 ]]]
 [[[end]]]
 
-#<TABHERE><TABHERE>adapter.add(CommonBehaviorI(<LOWER>I, self.communicator), ic.stringToIdentity('commonbehavior'))
+#<TABHERE><TABHERE>adapter.add(CommonBehaviorI(<LOWER>I, ic), ic.stringToIdentity('commonbehavior'))
 
 		app.exec_()
 

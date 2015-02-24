@@ -54,8 +54,31 @@ Z()
 #    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import sys, os, Ice
+
 from PySide import *
 from genericworker import *
+
+ROBOCOMP = ''
+try:
+	ROBOCOMP = os.environ['ROBOCOMP']
+except:
+	pass
+if len(ROBOCOMP)<1:
+	print 'ROBOCOMP environment variable not set! Exiting.'
+	sys.exit()
+
+
+preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
+[[[cog
+for imp in component['imports']:
+	module = IDSLParsing.gimmeIDSL(imp.split('/')[-1])
+	incl = imp.split('/')[-1].split('.')[0]
+	cog.outl('Ice.loadSlice(preStr+"'+incl+'.ice")')
+	cog.outl('from '+module['name']+' import *')
+]]]
+[[[end]]]
+
 
 [[[cog
 	for im in component['implements']+component['subscribesTo']:
@@ -96,73 +119,58 @@ class SpecificWorker(GenericWorker):
 		return True
 
 [[[cog
-if 'implements' in component:
-	for imp in component['implements']:
-		module = pool.moduleProviding(imp)
-		for interface in module['interfaces']:
-			if interface['name'] == imp:
-				for mname in interface['methods']:
-					method = interface['methods'][mname]
-					outValues = []
-					if method['return'] != 'void':
-						outValues.append([method['return'], 'ret'])
-					paramStrA = ''
-					for p in method['params']:
-						if p['decorator'] == 'out':
-							outValues.append([p['type'], p['name']])
-						else:
-							paramStrA += ', ' +  p['name']
-					cog.outl('<TABHERE>def ' + method['name'] + '(self' + paramStrA + "):")
-					if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>ret = "+method['return']+'()')
-					cog.outl("<TABHERE><TABHERE>#")
-					cog.outl("<TABHERE><TABHERE># YOUR CODE HERE")
-					cog.outl("<TABHERE><TABHERE>#")
-					if len(outValues) == 0:
-						cog.outl("<TABHERE><TABHERE>pass\n")
-					elif len(outValues) == 1:
-						if method['return'] != 'void':
-							cog.outl("<TABHERE><TABHERE>return ret\n")
-						else:
-							cog.outl("<TABHERE><TABHERE>"+outValues[0][1]+" = "+replaceTypeCPP2Python(outValues[0][0])+"()")
-							cog.outl("<TABHERE><TABHERE>return "+outValues[0][1]+"\n")
+lst = []
+try:
+	lst += component['implements']
+except:
+	pass
+try:
+	lst += component['subscribesTo']
+except:
+	pass
+for imp in lst:
+	module = pool.moduleProviding(imp)
+	for interface in module['interfaces']:
+		if interface['name'] == imp:
+			for mname in interface['methods']:
+				method = interface['methods'][mname]
+				outValues = []
+				if method['return'] != 'void':
+					outValues.append([method['return'], 'ret'])
+				paramStrA = ''
+				for p in method['params']:
+					if p['decorator'] == 'out':
+						outValues.append([p['type'], p['name']])
 					else:
-						for v in outValues:
-							if v[1] != 'ret':
-								cog.outl("<TABHERE><TABHERE>"+v[1]+" = "+replaceTypeCPP2Python(v[0])+"()")
-						first = True
-						cog.out("<TABHERE><TABHERE>return [")
-						for v in outValues:
-							if not first: cog.out(', ')
-							cog.out(v[1])
-							if first:
-								first = False
-						cog.out("]\n")
+						paramStrA += ', ' +  p['name']
+				cog.outl('<TABHERE>def ' + method['name'] + '(self' + paramStrA + "):")
+				if method['return'] != 'void': cog.outl("<TABHERE><TABHERE>ret = "+method['return']+'()')
+				cog.outl("<TABHERE><TABHERE>#")
+				cog.outl("<TABHERE><TABHERE># YOUR CODE HERE")
+				cog.outl("<TABHERE><TABHERE>#")
+				if len(outValues) == 0:
+					cog.outl("<TABHERE><TABHERE>pass\n")
+				elif len(outValues) == 1:
+					if method['return'] != 'void':
+						cog.outl("<TABHERE><TABHERE>return ret\n")
+					else:
+						cog.outl("<TABHERE><TABHERE>"+outValues[0][1]+" = "+replaceTypeCPP2Python(outValues[0][0])+"()")
+						cog.outl("<TABHERE><TABHERE>return "+outValues[0][1]+"\n")
+				else:
+					for v in outValues:
+						if v[1] != 'ret':
+							cog.outl("<TABHERE><TABHERE>"+v[1]+" = "+replaceTypeCPP2Python(v[0])+"()")
+					first = True
+					cog.out("<TABHERE><TABHERE>return [")
+					for v in outValues:
+						if not first: cog.out(', ')
+						cog.out(v[1])
+						if first:
+							first = False
+					cog.out("]\n")
 ]]]
 [[[end]]]
 
-[[[cog
-if 'subscribesTo' in component:
-	for sub in component['subscribesTo']:
-		module = pool.moduleProviding(sub)
-		for interface in module['interfaces']:
-			if interface['name'] == sub:
-				for mname in interface['methods']:
-					method = interface['methods'][mname]
-					paramStrA = ''
-					for p in method['params']:
-						if paramStrA == '': delim = ''
-						else: delim = ', '
-						if p['decorator'] == 'out':
-							const = ''
-						else:
-							const = 'const '
-						if  p['type'] in [ 'int' ]:
-							ampersand = ''
-						else:
-							ampersand = '&'
-						paramStrA += const + p['type'] + ' ' + ampersand + p['name'] + delim
-					cog.outl('<TABHERE>def ' + method['name'] + '(self, ' + paramStrA + "):\n<TABHERE>pass\n")
-]]]
-[[[end]]]
+
 
 

@@ -35,7 +35,7 @@ for sb in component['subscribesTo']:
 	if text == False:
 		cog.outl('# Endpoints for subscriptions')
 		text = True
-	cog.outl(sb+".Endpoints=tcp -p 0")
+	cog.outl(sb+"Topic.Endpoints=tcp -p 0")
 if text:
 	cog.out('\n\n')
 

@@ -86,8 +86,8 @@ if component['language'].lower() == 'cpp':
 	for f in files:
 		ofile = outputPath + '/' + f
 		if f in specificFiles and os.path.exists(ofile):
-			print 'Skipping overwriting specific file:', ofile
-			continue
+			print 'Not overwriting specific file "'+ ofile +'", saving it to '+ofile+'.new'
+			ofile += '.new'
 		ifile = "templateCPP/" + f
 		print 'Generating', ofile, 'from', ifile
 		run = "cog.py -z -d -D theCDSL="+inputFile + " -D theIDSLs="+imports + " -o " + ofile + " " + ifile
@@ -137,8 +137,8 @@ elif component['language'].lower() == 'python':
 		else:
 			ofile = outputPath + '/' + f
 		if f in specificFiles and os.path.exists(ofile):
-			print 'Skipping overwriting specific file:', ofile
-			continue
+			print 'Not overwriting specific file "'+ ofile +'", saving it to '+ofile+'.new'
+			ofile += '.new'
 		ifile = "templatePython/" + f
 		print 'Generating', ofile, 'from', ifile
 		run = "cog.py -z -d -D theCDSL="+inputFile + " -D theIDSLs="+imports + " -o " + ofile + " " + ifile
